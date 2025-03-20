@@ -123,15 +123,15 @@ const CampaignTable = () => {
   // Get appropriate icon for campaign
   function getCampaignIcon(campaignName: string) {
     if (campaignName.includes("AI") || campaignName.includes("Assistant")) {
-      return <Bot className="text-primary-700" />;
+      return <Bot className="text-primary-700 dark:text-primary-300" />;
     } else if (campaignName.includes("Trading") || campaignName.includes("Invest")) {
-      return <TrendingUp className="text-blue-700" />;
+      return <TrendingUp className="text-blue-700 dark:text-blue-300" />;
     } else if (campaignName.includes("Code") || campaignName.includes("Pro")) {
-      return <Code className="text-purple-700" />;
+      return <Code className="text-purple-700 dark:text-purple-300" />;
     } else if (campaignName.includes("Cloud") || campaignName.includes("Stack")) {
-      return <Cloud className="text-red-700" />;
+      return <Cloud className="text-red-700 dark:text-red-300" />;
     } else {
-      return <Bot className="text-primary-700" />;
+      return <Bot className="text-primary-700 dark:text-primary-300" />;
     }
   }
 
