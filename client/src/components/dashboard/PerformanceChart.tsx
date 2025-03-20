@@ -42,10 +42,10 @@ const PerformanceChart = () => {
     generateSampleData(timeRange);
 
   return (
-    <Card className="fade-in lg:col-span-2" style={{ animationDelay: "0.4s" }}>
+    <Card className="fade-in lg:col-span-2 dark:bg-gray-800 dark:border-gray-700" style={{ animationDelay: "0.4s" }}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-heading font-semibold text-primary-800">Performance Over Time</h3>
+          <h3 className="font-heading font-semibold text-primary-800 dark:text-primary-300">Performance Over Time</h3>
           <div className="flex space-x-2">
             {timeRanges.map((range) => (
               <Button
@@ -77,17 +77,48 @@ const PerformanceChart = () => {
                   <stop offset="95%" stopColor="#059669" stopOpacity={0.1} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} />
-              <XAxis dataKey="date" axisLine={false} tickLine={false} />
-              <YAxis axisLine={false} tickLine={false} />
-              <Tooltip />
-              <Legend wrapperStyle={{ position: 'relative', marginTop: '10px' }} />
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                vertical={false} 
+                opacity={0.2}
+                stroke="rgba(107, 114, 128, 0.3)" 
+              />
+              <XAxis 
+                dataKey="date" 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: 'currentColor', opacity: 0.75 }}
+                className="text-gray-700 dark:text-gray-300"
+              />
+              <YAxis 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: 'currentColor', opacity: 0.75 }}
+                className="text-gray-700 dark:text-gray-300" 
+              />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'var(--card-background, #fff)', 
+                  borderColor: 'var(--border-color, #e5e7eb)',
+                  color: 'var(--text-color, #374151)',
+                  borderRadius: '0.375rem',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }} 
+              />
+              <Legend 
+                wrapperStyle={{ 
+                  position: 'relative', 
+                  marginTop: '10px',
+                  color: 'var(--text-color, #374151)'
+                }} 
+              />
               <Area
                 type="monotone"
                 dataKey="clicks"
                 stroke="#3B82F6"
                 fillOpacity={1}
                 fill="url(#colorClicks)"
+                name="Clicks"
               />
               <Area
                 type="monotone"
@@ -95,6 +126,7 @@ const PerformanceChart = () => {
                 stroke="#059669"
                 fillOpacity={1}
                 fill="url(#colorRevenue)"
+                name="Revenue"
               />
             </AreaChart>
           </ResponsiveContainer>

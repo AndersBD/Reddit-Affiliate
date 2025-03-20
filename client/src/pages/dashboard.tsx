@@ -22,8 +22,8 @@ const Dashboard = () => {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold font-heading text-primary-800">Dashboard</h1>
-        <p className="text-gray-600">Overview of your affiliate campaigns and performance</p>
+        <h1 className="text-2xl font-bold font-heading text-primary-800 dark:text-primary-300">Dashboard</h1>
+        <p className="text-gray-600 dark:text-gray-400">Overview of your affiliate campaigns and performance</p>
       </div>
       
       {/* Quick Stats */}
@@ -32,8 +32,8 @@ const Dashboard = () => {
           title="Active Campaigns"
           value={isLoading ? "Loading..." : stats?.activeCampaigns || 0}
           icon={<Megaphone className="h-5 w-5 text-primary-500" />}
-          iconBgColor="bg-primary-100"
-          iconColor="text-primary-500"
+          iconBgColor="bg-primary-100 dark:bg-primary-900"
+          iconColor="text-primary-500 dark:text-primary-300"
           changeValue="23% from last month"
           changeDirection="up"
         />
@@ -41,9 +41,9 @@ const Dashboard = () => {
         <StatsCard 
           title="Monthly Clicks"
           value={isLoading ? "Loading..." : stats?.monthlyClicks?.toLocaleString() || 0}
-          icon={<MousePointer className="h-5 w-5 text-warning-500" />}
-          iconBgColor="bg-warning-100"
-          iconColor="text-warning-500"
+          icon={<MousePointer className="h-5 w-5 text-warning-500 dark:text-warning-400" />}
+          iconBgColor="bg-warning-100 dark:bg-warning-900"
+          iconColor="text-warning-500 dark:text-warning-400"
           changeValue="7.8% from last month"
           changeDirection="up"
           animationDelay="0.1s"
@@ -52,9 +52,9 @@ const Dashboard = () => {
         <StatsCard 
           title="Conversion Rate"
           value={isLoading ? "Loading..." : `${stats?.conversionRate || 0}%`}
-          icon={<ArrowRightLeft className="h-5 w-5 text-success-500" />}
-          iconBgColor="bg-success-100"
-          iconColor="text-success-500"
+          icon={<ArrowRightLeft className="h-5 w-5 text-success-500 dark:text-success-400" />}
+          iconBgColor="bg-success-100 dark:bg-success-900"
+          iconColor="text-success-500 dark:text-success-400"
           changeValue="0.5% from last month"
           changeDirection="down"
           animationDelay="0.2s"
@@ -63,9 +63,9 @@ const Dashboard = () => {
         <StatsCard 
           title="Revenue"
           value={isLoading ? "Loading..." : `$${stats?.revenue?.toLocaleString() || 0}`}
-          icon={<DollarSign className="h-5 w-5 text-primary-500" />}
-          iconBgColor="bg-primary-100"
-          iconColor="text-primary-500"
+          icon={<DollarSign className="h-5 w-5 text-primary-500 dark:text-primary-300" />}
+          iconBgColor="bg-primary-100 dark:bg-primary-900"
+          iconColor="text-primary-500 dark:text-primary-300"
           changeValue="12.3% from last month"
           changeDirection="up"
           animationDelay="0.3s"
