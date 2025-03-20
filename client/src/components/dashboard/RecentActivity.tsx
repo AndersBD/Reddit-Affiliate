@@ -87,10 +87,10 @@ const RecentActivity = () => {
   };
 
   return (
-    <Card className="fade-in" style={{ animationDelay: "1s" }}>
+    <Card className="fade-in bg-white dark:bg-gray-800 dark:border-gray-700" style={{ animationDelay: "1s" }}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-heading font-semibold text-primary-800">Recent Activity</h3>
+          <h3 className="font-heading font-semibold text-primary-800 dark:text-primary-300">Recent Activity</h3>
           <Button variant="link" className="text-primary-600 text-sm p-0">View All</Button>
         </div>
         
@@ -115,13 +115,13 @@ const RecentActivity = () => {
                   {getActivityIcon(activity.type)}
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm" dangerouslySetInnerHTML={{ __html: formatActivityMessage(activity.message) }} />
-                  <div className="text-xs text-gray-500 mt-0.5">
+                  <div className="text-sm dark:text-gray-200" dangerouslySetInnerHTML={{ __html: formatActivityMessage(activity.message) }} />
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     {formatRelativeTime(activity.timestamp)}
                   </div>
                 </div>
                 <div>
-                  <Button variant="link" className="text-primary-600 text-sm p-0">View</Button>
+                  <Button variant="link" className="text-primary-600 dark:text-primary-400 text-sm p-0">View</Button>
                 </div>
               </div>
             ))

@@ -77,16 +77,16 @@ const ScheduleManager = () => {
   }
 
   return (
-    <Card className="fade-in" style={{ animationDelay: "0.8s" }}>
+    <Card className="fade-in bg-white dark:bg-gray-800 dark:border-gray-700" style={{ animationDelay: "0.8s" }}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-heading font-semibold text-primary-800">Schedule Posts</h3>
+          <h3 className="font-heading font-semibold text-primary-800 dark:text-primary-300">Schedule Posts</h3>
           <Badge className="bg-blue-100 text-blue-700">
             {isLoading ? "Loading..." : `${sortedPosts.length} pending`}
           </Badge>
         </div>
         
-        <p className="text-sm text-gray-600 mb-4">
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
           Upcoming scheduled posts across all campaigns.
         </p>
         
@@ -110,23 +110,23 @@ const ScheduleManager = () => {
             sortedPosts.map((post) => (
               <div 
                 className={`flex items-start border-l-4 ${
-                  post.isToday ? 'border-primary-400' : 'border-gray-300'
+                  post.isToday ? 'border-primary-400' : 'border-gray-300 dark:border-gray-600'
                 } pl-3 py-1`}
                 key={post.id}
               >
                 <div className="flex-1">
-                  <div className="text-sm font-medium">{post.campaignName}</div>
-                  <div className="text-xs text-gray-500">{post.subreddit} - {post.timeDisplay}</div>
+                  <div className="text-sm font-medium dark:text-gray-200">{post.campaignName}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{post.subreddit} - {post.timeDisplay}</div>
                 </div>
                 <div className="flex space-x-1">
                   <Button variant="ghost" size="sm" className="h-7 w-7 p-0" asChild>
                     <Link href={`/content-library/${post.id}`}>
-                      <Eye className="h-4 w-4 text-gray-500" />
+                      <Eye className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                     </Link>
                   </Button>
                   <Button variant="ghost" size="sm" className="h-7 w-7 p-0" asChild>
                     <Link href={`/scheduling/${post.id}`}>
-                      <Edit className="h-4 w-4 text-gray-500" />
+                      <Edit className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                     </Link>
                   </Button>
                 </div>
@@ -134,7 +134,7 @@ const ScheduleManager = () => {
             ))
           ) : (
             <div className="text-center py-4">
-              <p className="text-sm text-gray-500">No scheduled posts yet</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">No scheduled posts yet</p>
             </div>
           )}
         </div>

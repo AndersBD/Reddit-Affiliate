@@ -25,7 +25,7 @@ const StatsCard = ({
 }: StatsCardProps) => {
   return (
     <Card 
-      className="fade-in dark:bg-gray-800 dark:border-gray-700"
+      className="fade-in bg-white dark:bg-gray-800 dark:border-gray-700"
       style={{ 
         animationDelay: animationDelay,
         animation: "fadeIn 0.4s ease-in-out"
