@@ -1,0 +1,39 @@
+Answer the following questions and give the answers in code snippet format so I can copy.
+
+Before implementing any changes in my application, I'll ensure 100% readiness by completing this assessment:
+
+{
+  "observe": {
+    "application_state": "Describe the current state of your application and the specific component experiencing issues",
+    "environment_details": "What is the deployment environment, browser/device context, and user scenario?",
+    "error_symptoms": "What specific errors or unexpected behaviors are occurring?",
+    "reproduction_steps": "What exact sequence of actions triggers this issue?",
+    "recent_changes": "What changes were made to the application prior to this issue appearing?"
+  },
+  
+  "orient": {
+    "pattern_recognition": "Does this issue resemble any known patterns or previous problems?",
+    "component_interactions": "How might the interactions between components contribute to this issue?",
+    "platform_specific_factors": "Are there any platform-specific features or limitations that might be relevant?",
+    "data_flow_analysis": "How is data flowing through the system at the point of failure?",
+    "hypotheses": "What are the most likely causes of this issue, ranked by probability?"
+  },
+  
+  "decide": {
+    "solution_options": "What potential solutions could address the most likely causes?",
+    "tradeoff_analysis": "What are the tradeoffs (complexity, time, risk) for each solution?",
+    "implementation_approach": "Should this be fixed with a quick patch or a more comprehensive refactor?",
+    "testing_strategy": "How will you verify that the solution actually resolves the issue?",
+    "selected_solution": "Which solution provides the best balance of effectiveness and safety?"
+  },
+  
+  "act": {
+    "implementation_plan": "What specific code changes need to be made and in what order?",
+    "fallback_preparation": "What rollback plan will you have ready if the solution causes problems?",
+    "verification_steps": "What exact tests will confirm the issue is resolved?",
+    "documentation_updates": "What documentation needs to be updated to reflect this fix?",
+    "knowledge_sharing": "How will you share what you've learned to prevent similar issues?"
+  },
+  
+  "final_readiness_assessment": "Based on all the above, am I 100% ready to proceed safely?"
+}
