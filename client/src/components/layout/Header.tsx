@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, Bell, User, Moon, Sun } from "lucide-react";
 import { 
   DropdownMenu,
@@ -13,7 +13,24 @@ import { Button } from "@/components/ui/button";
 
 const Header = () => {
   const [searchText, setSearchText] = useState("");
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Check local storage first
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      return savedTheme === 'dark';
+    }
+    // Otherwise check system preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+  
+  // Apply theme on initial render
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
   
   const handleToggleSidebar = () => {
     // Toggle sidebar visibility on mobile
@@ -25,12 +42,8 @@ const Header = () => {
     const newDarkMode = !isDarkMode;
     setIsDarkMode(newDarkMode);
     
-    // Apply dark mode to document
-    if (newDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    // Save preference to localStorage
+    localStorage.setItem('theme', newDarkMode ? 'dark' : 'light');
   };
 
   return (
