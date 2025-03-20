@@ -1,0 +1,35 @@
+ROLE: Senior Systems Architecture Consultant for an Affiliate Marketing Automation Platform
+TASK: Full-Scale System Design & Implementation Plan
+CONTEXT:
+•	Goal: Automate and optimize affiliate marketing campaigns using Reddit to drive SEO traffic.
+•	Scope: 
+o	Identify high-converting affiliate programs that pay cash (e.g., software, finance, SaaS).
+o	Post Reddit threads/comments at optimal times and in compliance with subreddit rules.
+o	Employ AI to generate human-sounding posts and respond to user engagement.
+o	Track clicks and conversions, and re-optimize campaigns based on performance.
+•	Users: 
+o	Single marketer or small marketing team (<10 users).
+o	~50 campaigns/month across various affiliate programs.
+o	Monthly budget of max $300 for tools/APIs.
+•	Requirements: 
+o	99.9% uptime to handle scheduling and analytics.
+o	Must obey Reddit’s terms of service (no spam or manipulative upvoting).
+o	Must track affiliate performance, integrate with affiliate dashboards, provide ROI reports.
+REQUIRED ANALYSIS:
+1.	Core functionality & architecture for automating Reddit posting, comment generation, scheduling, and tracking performance metrics.
+2.	Use of AI (e.g., GPT) for content generation, ensuring authenticity and compliance.
+3.	Cost breakdown of third-party integrations (schedulers, analytics, affiliate networks), within a $300/month budget.
+4.	Security and compliance with Reddit API terms, user data privacy, and anti-spam regulations.
+5.	Roadmap from MVP to a fully automated, scalable platform.
+OUTPUT FORMAT:
+1.	Executive brief (250 words): Summarize the overall system proposal for C-level stakeholders, focusing on the benefits, ROI, and strategic impact.
+2.	Technical details (500 words): Deep-dive into the architecture (frontend, backend, databases, integrations, AI modules).
+3.	Risk matrix: Identify possible failure points (e.g., subreddit bans, AI content detection, scheduling conflicts), with severity and mitigation strategies.
+4.	Timeline visualization: Gantt chart or phased plan showing project milestones from development to deployment (estimated 6–12 months).
+5.	Budget breakdown: Outline of costs (hosting, AI API usage, third-party tools, developer hours) with justification to stay at or below $300/month for running expenses.
+CONSTRAINTS:
+•	Operational Continuity: Platform must run daily schedules reliably, with minimal downtime to avoid missed postings.
+•	Ethical & Compliance: Must adhere to Reddit’s TOS, no vote manipulation, minimal risk of spam detection.
+•	Time Frame: Deliver working MVP within 3 months, full rollout by 12 months.
+•	Scalability: Architecture should handle growth up to 5× user load for future expansions.
+
