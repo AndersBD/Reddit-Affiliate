@@ -139,13 +139,13 @@ const CampaignTable = () => {
   function getStatusBadge(status: string) {
     switch (status) {
       case "active":
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Active</Badge>;
+        return <Badge className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900">Active</Badge>;
       case "paused":
-        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Paused</Badge>;
+        return <Badge className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900">Paused</Badge>;
       case "scheduled":
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Scheduled</Badge>;
+        return <Badge className="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300 hover:bg-yellow-100 dark:hover:bg-yellow-900">Scheduled</Badge>;
       default:
-        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">{status}</Badge>;
+        return <Badge className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">{status}</Badge>;
     }
   }
 
@@ -201,7 +201,7 @@ const CampaignTable = () => {
   function formatROI(roi: number) {
     return {
       value: `${roi >= 0 ? "+" : ""}${roi}%`,
-      className: roi >= 0 ? "text-success-700" : "text-danger-700"
+      className: roi >= 0 ? "text-success-700 dark:text-success-400" : "text-danger-700 dark:text-danger-400"
     };
   }
 
@@ -215,13 +215,13 @@ const CampaignTable = () => {
   };
 
   return (
-    <Card className="fade-in mb-6" style={{ animationDelay: "0.6s" }}>
+    <Card className="fade-in mb-6 dark:bg-gray-800 dark:border-gray-700" style={{ animationDelay: "0.6s" }}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-heading font-semibold text-primary-800">Recent Campaigns</h3>
+          <h3 className="font-heading font-semibold text-primary-800 dark:text-primary-300">Recent Campaigns</h3>
           <div className="flex space-x-2">
             <Select value={programFilter} onValueChange={setProgramFilter}>
-              <SelectTrigger className="bg-gray-100 border-0 text-sm w-[180px]">
+              <SelectTrigger className="bg-gray-100 dark:bg-gray-700 border-0 text-sm w-[180px] dark:text-gray-200">
                 <SelectValue placeholder="All Programs" />
               </SelectTrigger>
               <SelectContent>
@@ -233,7 +233,7 @@ const CampaignTable = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Button className="bg-primary-600 hover:bg-primary-700">
+            <Button className="bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600">
               <Link href="/campaigns/new">
                 <span className="flex items-center">
                   <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -247,55 +247,55 @@ const CampaignTable = () => {
         </div>
         
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead>
               <tr>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subreddit</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Schedule</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Performance</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ROI</th>
-                <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Campaign</th>
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Subreddit</th>
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Schedule</th>
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Performance</th>
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">ROI</th>
+                <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {isLoading ? (
                 // Loading skeleton
                 Array(4).fill(0).map((_, index) => (
                   <tr key={index}>
                     <td className="px-3 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <Skeleton className="h-8 w-8 rounded-md" />
+                        <Skeleton className="h-8 w-8 rounded-md dark:bg-gray-700" />
                         <div className="ml-3">
-                          <Skeleton className="h-4 w-32" />
-                          <Skeleton className="h-3 w-24 mt-1" />
+                          <Skeleton className="h-4 w-32 dark:bg-gray-700" />
+                          <Skeleton className="h-3 w-24 mt-1 dark:bg-gray-700" />
                         </div>
                       </div>
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap">
-                      <Skeleton className="h-6 w-16 rounded-full" />
+                      <Skeleton className="h-6 w-16 rounded-full dark:bg-gray-700" />
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap">
-                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-4 w-32 dark:bg-gray-700" />
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap">
-                      <Skeleton className="h-4 w-24" />
-                      <Skeleton className="h-3 w-20 mt-1" />
+                      <Skeleton className="h-4 w-24 dark:bg-gray-700" />
+                      <Skeleton className="h-3 w-20 mt-1 dark:bg-gray-700" />
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-3 w-32 mt-1" />
+                      <Skeleton className="h-4 w-full dark:bg-gray-700" />
+                      <Skeleton className="h-3 w-32 mt-1 dark:bg-gray-700" />
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap">
-                      <Skeleton className="h-4 w-16" />
-                      <Skeleton className="h-3 w-20 mt-1" />
+                      <Skeleton className="h-4 w-16 dark:bg-gray-700" />
+                      <Skeleton className="h-3 w-20 mt-1 dark:bg-gray-700" />
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap text-center">
                       <div className="flex justify-center space-x-1">
-                        <Skeleton className="h-8 w-8 rounded-full" />
-                        <Skeleton className="h-8 w-8 rounded-full" />
-                        <Skeleton className="h-8 w-8 rounded-full" />
+                        <Skeleton className="h-8 w-8 rounded-full dark:bg-gray-700" />
+                        <Skeleton className="h-8 w-8 rounded-full dark:bg-gray-700" />
+                        <Skeleton className="h-8 w-8 rounded-full dark:bg-gray-700" />
                       </div>
                     </td>
                   </tr>
@@ -305,29 +305,29 @@ const CampaignTable = () => {
                   <tr key={campaign.id}>
                     <td className="px-3 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-8 w-8 bg-primary-100 rounded-md flex items-center justify-center text-primary-700">
+                        <div className="flex-shrink-0 h-8 w-8 bg-primary-100 dark:bg-primary-900 rounded-md flex items-center justify-center text-primary-700 dark:text-primary-300">
                           {getCampaignIcon(campaign.name)}
                         </div>
                         <div className="ml-3">
-                          <div className="text-sm font-medium text-gray-900">{campaign.name}</div>
-                          <div className="text-xs text-gray-500">Affiliate Program: {campaign.affiliateProgramName}</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{campaign.name}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Affiliate Program: {campaign.affiliateProgramName}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap">
                       {getStatusBadge(campaign.status)}
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
                       {campaign.targetSubreddits?.join(", ") || "No subreddits"}
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       <div>{formatSchedule(campaign).primary}</div>
-                      <div className="text-xs text-gray-400">{formatSchedule(campaign).secondary}</div>
+                      <div className="text-xs text-gray-400 dark:text-gray-500">{formatSchedule(campaign).secondary}</div>
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="mr-2 text-sm font-medium">{campaign.metrics.performance}%</div>
-                        <div className="w-16 bg-gray-200 rounded-full h-2">
+                        <div className="mr-2 text-sm font-medium dark:text-gray-200">{campaign.metrics.performance}%</div>
+                        <div className="w-16 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
                           <Progress 
                             value={campaign.metrics.performance} 
                             className={`h-2 rounded-full ${
@@ -338,32 +338,32 @@ const CampaignTable = () => {
                           />
                         </div>
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {campaign.metrics.clicks} clicks / {campaign.metrics.conversions} conversions
                       </div>
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap">
-                      <div className={`text-sm font-medium ${formatROI(campaign.metrics.roi).className}`}>
+                      <div className={`text-sm font-medium ${formatROI(campaign.metrics.roi).className} dark:text-success-400`}>
                         {formatROI(campaign.metrics.roi).value}
                       </div>
-                      <div className="text-xs text-gray-500">${campaign.metrics.revenue.toFixed(2)}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">${campaign.metrics.revenue.toFixed(2)}</div>
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap text-center text-sm font-medium">
                       <div className="flex justify-center space-x-1">
                         <Button variant="ghost" size="icon" asChild>
                           <Link href={`/campaigns/${campaign.id}`}>
-                            <Edit className="h-4 w-4 text-primary-600" />
+                            <Edit className="h-4 w-4 text-primary-600 dark:text-primary-400" />
                           </Link>
                         </Button>
                         <Button variant="ghost" size="icon" asChild>
                           <Link href={`/analytics?campaignId=${campaign.id}`}>
-                            <BarChart2 className="h-4 w-4 text-gray-600" />
+                            <BarChart2 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                           </Link>
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4 text-gray-600" />
+                              <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
@@ -392,28 +392,28 @@ const CampaignTable = () => {
         </div>
         
         <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
             Showing {Math.min(filteredCampaigns.length, 4)} of {filteredCampaigns.length} campaigns
           </div>
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious href="#" />
+                <PaginationPrevious href="#" className="hover:bg-gray-100 dark:hover:bg-gray-700" />
               </PaginationItem>
               <PaginationItem>
-                <PaginationLink href="#" isActive>1</PaginationLink>
+                <PaginationLink href="#" isActive className="dark:bg-primary-800 dark:text-white">1</PaginationLink>
               </PaginationItem>
               <PaginationItem>
-                <PaginationLink href="#">2</PaginationLink>
+                <PaginationLink href="#" className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300">2</PaginationLink>
               </PaginationItem>
               <PaginationItem>
-                <PaginationLink href="#">3</PaginationLink>
+                <PaginationLink href="#" className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300">3</PaginationLink>
               </PaginationItem>
               <PaginationItem>
-                <PaginationEllipsis />
+                <PaginationEllipsis className="dark:text-gray-400" />
               </PaginationItem>
               <PaginationItem>
-                <PaginationNext href="#" />
+                <PaginationNext href="#" className="hover:bg-gray-100 dark:hover:bg-gray-700" />
               </PaginationItem>
             </PaginationContent>
           </Pagination>
