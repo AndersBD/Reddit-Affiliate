@@ -28,7 +28,7 @@ import {
   PolarRadiusAxis 
 } from "recharts";
 import { format, differenceInDays } from "date-fns";
-import { TrendingUp, TrendingDown, Equals } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 interface DateRange {
   from: Date;
@@ -369,7 +369,7 @@ const KpiCard = ({
               ) : trend === "down" ? (
                 <TrendingDown className="h-3 w-3 mr-1" />
               ) : (
-                <Equals className="h-3 w-3 mr-1" />
+                <Minus className="h-3 w-3 mr-1" />
               )}
               <span>
                 {Math.abs(percentChange).toFixed(1)}% {trend === "up" ? "increase" : trend === "down" ? "decrease" : "change"}

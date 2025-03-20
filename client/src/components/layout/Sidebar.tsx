@@ -9,7 +9,7 @@ import {
   Handshake, 
   Settings, 
   HelpCircle,
-  Robot
+  Bot
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -67,7 +67,7 @@ const Sidebar = () => {
     <div className="bg-primary-800 text-white w-64 flex-shrink-0 hidden md:block transition-all duration-300 ease-in-out">
       <div className="p-4 flex items-center">
         <div className="bg-primary-400 p-2 rounded-lg mr-2">
-          <Robot className="text-white h-5 w-5" />
+          <Bot className="text-white h-5 w-5" />
         </div>
         <h1 className="font-heading text-xl font-bold text-white">RedditAffiliateAI</h1>
       </div>

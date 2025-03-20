@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Edit, BarChart2, MoreVertical, Robot, TrendingUp, Code, Cloud } from "lucide-react";
+import { Edit, BarChart2, MoreVertical, Bot, TrendingUp, Code, Cloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -56,7 +56,7 @@ const CampaignTable = () => {
     queryKey: ['/api/affiliate-programs'],
   });
 
-  const { data: performance } = useQuery({
+  const { data: performanceMetrics } = useQuery({
     queryKey: ['/api/performance'],
   });
 
@@ -88,9 +88,9 @@ const CampaignTable = () => {
 
   // Get metrics for a campaign
   function getCampaignMetrics(campaignId: number): CampaignMetrics {
-    const metrics = performance?.filter((p: any) => p.campaignId === campaignId) || [];
+    const performanceData = performanceMetrics?.filter((p: any) => p.campaignId === campaignId) || [];
     
-    if (metrics.length === 0) {
+    if (performanceData.length === 0) {
       return {
         clicks: 0,
         conversions: 0,
@@ -100,12 +100,12 @@ const CampaignTable = () => {
       };
     }
     
-    const totalClicks = metrics.reduce((sum: number, m: any) => sum + m.clicks, 0);
-    const totalConversions = metrics.reduce((sum: number, m: any) => sum + m.conversions, 0);
-    const totalRevenue = metrics.reduce((sum: number, m: any) => sum + m.revenue, 0);
+    const totalClicks = performanceData.reduce((sum: number, m: any) => sum + m.clicks, 0);
+    const totalConversions = performanceData.reduce((sum: number, m: any) => sum + m.conversions, 0);
+    const totalRevenue = performanceData.reduce((sum: number, m: any) => sum + m.revenue, 0);
     
     // Calculate performance as % of target (for demo, use 500 clicks as target)
-    const performance = Math.min(100, Math.round((totalClicks / 500) * 100));
+    const performanceValue: number = Math.min(100, Math.round((totalClicks / 500) * 100));
     
     // Calculate ROI (for demo, assume cost of $100 per campaign)
     const cost = 100; 
@@ -114,7 +114,7 @@ const CampaignTable = () => {
     return {
       clicks: totalClicks,
       conversions: totalConversions,
-      performance,
+      performance: performanceValue,
       roi,
       revenue: totalRevenue
     };
@@ -123,7 +123,7 @@ const CampaignTable = () => {
   // Get appropriate icon for campaign
   function getCampaignIcon(campaignName: string) {
     if (campaignName.includes("AI") || campaignName.includes("Assistant")) {
-      return <Robot className="text-primary-700" />;
+      return <Bot className="text-primary-700" />;
     } else if (campaignName.includes("Trading") || campaignName.includes("Invest")) {
       return <TrendingUp className="text-blue-700" />;
     } else if (campaignName.includes("Code") || campaignName.includes("Pro")) {
@@ -131,7 +131,7 @@ const CampaignTable = () => {
     } else if (campaignName.includes("Cloud") || campaignName.includes("Stack")) {
       return <Cloud className="text-red-700" />;
     } else {
-      return <Robot className="text-primary-700" />;
+      return <Bot className="text-primary-700" />;
     }
   }
 
@@ -150,8 +150,13 @@ const CampaignTable = () => {
   }
 
   // Format schedule display
-  function formatSchedule(campaign: Campaign) {
-    if (!campaign.schedule) return "Not scheduled";
+  function formatSchedule(campaign: Campaign): { primary: string; secondary: string } {
+    if (!campaign.schedule) {
+      return {
+        primary: "Not scheduled",
+        secondary: ""
+      };
+    }
     
     const { frequency, timeRanges, daysOfWeek, timezone } = campaign.schedule;
     

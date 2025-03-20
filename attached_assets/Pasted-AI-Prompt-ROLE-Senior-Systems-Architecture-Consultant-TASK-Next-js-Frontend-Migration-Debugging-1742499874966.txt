@@ -1,0 +1,29 @@
+AI Prompt
+ROLE: Senior Systems Architecture Consultant
+
+TASK: Next.js Frontend Migration & Debugging Analysis
+
+CONTEXT:
+
+A React-based web application is experiencing bugs and performance issues.
+Goal: Migrate or refactor the React frontend into a Next.js framework for improved stability, SEO, and maintainability.
+Current user base: ~500 daily users.
+Uptime requirement: 99.99%.
+REQUIRED ANALYSIS:
+
+Migration Risks & Mitigation Strategies: Identify technical pitfalls (e.g., routing conflicts, SSR constraints), propose fallback plans.
+Cloud vs. Hybrid Options: Evaluate hosting (Vercel, AWS, or a hybrid approach) in the context of Next.js.
+Cost-Benefit Analysis: Compare short-term debugging vs. full Next.js migration in terms of developer hours, performance gains, user experience, and TCO.
+Implementation Roadmap: Outline a step-by-step plan to fix bugs, unify React components under Next.js, and ensure minimal downtime.
+OUTPUT FORMAT:
+
+Executive Brief (250 words): High-level summary for stakeholders—why Next.js and a robust debugging approach matter, plus expected ROI.
+Technical Details (500 words): In-depth explanation of key Next.js features (SSR, dynamic routing, serverless functions), debugging methods, build pipeline changes, and data-fetching strategies.
+Risk Matrix: Potential issues (e.g., SEO disruption, codebase incompatibility, deployment errors) with severity levels and contingency measures.
+Timeline Visualization: Gantt or phased rollout for the entire debugging + migration effort, from initial audits to final deployment.
+Budget Breakdown: Developer hours, hosting costs (Vercel/AWS), potential third-party tools for monitoring and error tracking.
+CONSTRAINTS:
+
+Must Maintain Operational Continuity: The platform must remain usable during the transition; minimal downtime is paramount.
+Compliance: Any user data or third-party integrations must adhere to relevant data privacy requirements.
+18-Month Implementation Window: All debugging, refactoring, and final deployment must be completed within 18 months to accommodate future expansion plans.
