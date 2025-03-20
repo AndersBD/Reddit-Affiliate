@@ -13,7 +13,7 @@ const TopSubreddits = () => {
   });
 
   return (
-    <Card className="fade-in dark:bg-gray-800 dark:border-gray-700" style={{ animationDelay: "0.5s" }}>
+    <Card className="fade-in bg-white dark:bg-gray-800 dark:border-gray-700" style={{ animationDelay: "0.5s" }}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-heading font-semibold text-primary-800 dark:text-primary-300">Top Subreddits</h3>

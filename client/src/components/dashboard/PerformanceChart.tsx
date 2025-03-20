@@ -42,7 +42,7 @@ const PerformanceChart = () => {
     generateSampleData(timeRange);
 
   return (
-    <Card className="fade-in lg:col-span-2 dark:bg-gray-800 dark:border-gray-700" style={{ animationDelay: "0.4s" }}>
+    <Card className="fade-in lg:col-span-2 bg-white dark:bg-gray-800 dark:border-gray-700" style={{ animationDelay: "0.4s" }}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-heading font-semibold text-primary-800 dark:text-primary-300">Performance Over Time</h3>
