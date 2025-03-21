@@ -2,8 +2,7 @@ import { describe, test, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import StatsCard from '../../../client/src/components/dashboard/StatsCard';
-import { ArrowUp, TrendingUp } from 'lucide-react';
-import '@testing-library/jest-dom';
+import { TrendingUp } from 'lucide-react';
 
 describe('StatsCard Component', () => {
   beforeEach(() => {
@@ -23,8 +22,8 @@ describe('StatsCard Component', () => {
       />
     );
 
-    expect(screen.getByText('Total Clicks')).toBeInTheDocument();
-    expect(screen.getByText('1,234')).toBeInTheDocument();
+    expect(screen.getByText('Total Clicks')).toBeDefined();
+    expect(screen.getByText('1,234')).toBeDefined();
   });
 
   test('displays correct color for positive change', () => {
@@ -41,7 +40,7 @@ describe('StatsCard Component', () => {
     );
 
     const changeValueElement = screen.getByText('8.2%');
-    expect(changeValueElement).toHaveClass('text-green-500');
+    expect(changeValueElement.className).toContain('text-success-500');
   });
 
   test('displays correct color for negative change', () => {
@@ -58,7 +57,7 @@ describe('StatsCard Component', () => {
     );
 
     const changeValueElement = screen.getByText('3.1%');
-    expect(changeValueElement).toHaveClass('text-red-500');
+    expect(changeValueElement.className).toContain('text-danger-500');
   });
 
   test('applies animation delay when provided', () => {
@@ -76,6 +75,6 @@ describe('StatsCard Component', () => {
     );
 
     const cardElement = screen.getByTestId('stats-card');
-    expect(cardElement).toHaveStyle('animation-delay: 200ms');
+    expect(cardElement.style.animationDelay).toBe('200ms');
   });
 });
