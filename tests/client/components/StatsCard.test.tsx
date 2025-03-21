@@ -27,7 +27,7 @@ describe('StatsCard Component', () => {
   });
 
   test('displays correct color for positive change', () => {
-    render(
+    const { container } = render(
       <StatsCard 
         title="Revenue" 
         value="$5,679" 
@@ -39,12 +39,12 @@ describe('StatsCard Component', () => {
       />
     );
 
-    const changeValueElement = screen.getByText('8.2%');
-    expect(changeValueElement.className).toContain('text-success-500');
+    const parentDiv = screen.getByText('8.2%').closest('div');
+    expect(parentDiv?.className).toContain('text-success-500');
   });
 
   test('displays correct color for negative change', () => {
-    render(
+    const { container } = render(
       <StatsCard 
         title="Bounce Rate" 
         value="24.8%" 
@@ -56,8 +56,8 @@ describe('StatsCard Component', () => {
       />
     );
 
-    const changeValueElement = screen.getByText('3.1%');
-    expect(changeValueElement.className).toContain('text-danger-500');
+    const parentDiv = screen.getByText('3.1%').closest('div');
+    expect(parentDiv?.className).toContain('text-danger-500');
   });
 
   test('applies animation delay when provided', () => {
