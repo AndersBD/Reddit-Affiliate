@@ -1,9 +1,15 @@
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || "demo-api-key" 
-});
+// Factory function for creating OpenAI client - makes testing easier
+export function createOpenAIClient() {
+  // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+  return new OpenAI({ 
+    apiKey: process.env.OPENAI_API_KEY || "demo-api-key" 
+  });
+}
+
+// Use a singleton instance for normal operation
+const openai = createOpenAIClient();
 
 // Generate Reddit post content based on campaign, template, and subreddit
 export async function generateRedditPost(
@@ -70,7 +76,8 @@ Respond with JSON in this format: { "title": "", "content": "Comment content..."
       response_format: { type: "json_object" },
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
+    const content = response.choices[0].message.content || '';
+    const result = JSON.parse(content);
     return {
       title: result.title || "",
       content: result.content,
@@ -126,7 +133,8 @@ Please write a natural, authentic-sounding response to this comment as part of m
       response_format: { type: "json_object" },
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
+    const content = response.choices[0].message.content || '';
+    const result = JSON.parse(content);
     return result.response;
   } catch (error) {
     console.error("Error generating comment response:", error);
@@ -177,7 +185,8 @@ Is this content compliant with Reddit and subreddit rules? Would it pass as auth
       response_format: { type: "json_object" },
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    const responseContent = response.choices[0].message.content || '';
+    return JSON.parse(responseContent);
   } catch (error) {
     console.error("Error checking content compliance:", error);
     throw new Error("Failed to check content compliance");
@@ -219,7 +228,8 @@ Analyze these posts and identify 5 trending topics or themes. Then provide strat
       response_format: { type: "json_object" },
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    const responseContent = response.choices[0].message.content || '';
+    return JSON.parse(responseContent);
   } catch (error) {
     console.error("Error analyzing trending topics:", error);
     throw new Error("Failed to analyze trending topics");
@@ -266,7 +276,8 @@ The link text should feel like a genuine recommendation, not marketing copy.`,
       response_format: { type: "json_object" },
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
+    const responseContent = response.choices[0].message.content || '';
+    const result = JSON.parse(responseContent);
     return result.linkText;
   } catch (error) {
     console.error("Error generating affiliate link description:", error);

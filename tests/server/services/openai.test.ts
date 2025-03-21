@@ -1,15 +1,20 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest';
-import * as openaiService from '../../../server/services/openai';
+import { describe, test, expect, vi } from 'vitest';
 
-// Mock the service functions directly instead of mocking the OpenAI library
-vi.mock('../../../server/services/openai', async (importOriginal) => {
-  const originalModule = await importOriginal();
-  return {
-    ...originalModule,
-    generateRedditPost: vi.fn(),
-    checkContentCompliance: vi.fn(),
-  };
-});
+// Directly mock the service functions
+vi.mock('../../../server/services/openai', () => ({
+  generateRedditPost: vi.fn(),
+  checkContentCompliance: vi.fn(),
+  generateCommentResponse: vi.fn(),
+  analyzeTrendingTopics: vi.fn(),
+  generateAffiliateLinkDescription: vi.fn(),
+  createOpenAIClient: vi.fn(),
+}));
+
+// Import after mocking
+import { 
+  generateRedditPost, 
+  checkContentCompliance 
+} from '../../../server/services/openai';
 
 describe('OpenAI Service', () => {
   beforeEach(() => {
@@ -18,12 +23,12 @@ describe('OpenAI Service', () => {
 
   test('generateRedditPost should return title and content', async () => {
     // Setup mock implementation
-    vi.mocked(openaiService.generateRedditPost).mockResolvedValue({
+    vi.mocked(generateRedditPost).mockResolvedValue({
       title: 'Mocked Title',
       content: 'Mocked content',
     });
 
-    const result = await openaiService.generateRedditPost(
+    const result = await generateRedditPost(
       'Test Campaign',
       'Test Affiliate',
       'Test Product Description',
@@ -37,7 +42,7 @@ describe('OpenAI Service', () => {
       content: 'Mocked content',
     });
 
-    expect(openaiService.generateRedditPost).toHaveBeenCalledWith(
+    expect(generateRedditPost).toHaveBeenCalledWith(
       'Test Campaign',
       'Test Affiliate',
       'Test Product Description',
@@ -48,14 +53,14 @@ describe('OpenAI Service', () => {
   });
 
   test('checkContentCompliance should return compliance status and issues', async () => {
-    // Setup mock implementation for this test
-    vi.mocked(openaiService.checkContentCompliance).mockResolvedValue({
+    // Setup mock implementation 
+    vi.mocked(checkContentCompliance).mockResolvedValue({
       compliant: true,
       issues: [],
       suggestions: 'No issues found',
     });
 
-    const result = await openaiService.checkContentCompliance('Test content', 'No spam rules');
+    const result = await checkContentCompliance('Test content', 'No spam rules');
 
     expect(result).toEqual({
       compliant: true,
@@ -63,15 +68,15 @@ describe('OpenAI Service', () => {
       suggestions: 'No issues found',
     });
 
-    expect(openaiService.checkContentCompliance).toHaveBeenCalledWith('Test content', 'No spam rules');
+    expect(checkContentCompliance).toHaveBeenCalledWith('Test content', 'No spam rules');
   });
 
   test('generateRedditPost should handle API errors', async () => {
-    // Setup mock implementation to throw error
-    vi.mocked(openaiService.generateRedditPost).mockRejectedValue(new Error('Failed to generate content with AI'));
+    // Mock implementation to throw error
+    vi.mocked(generateRedditPost).mockRejectedValue(new Error('Failed to generate content with AI'));
 
     await expect(
-      openaiService.generateRedditPost(
+      generateRedditPost(
         'Test Campaign',
         'Test Affiliate',
         'Test Product Description',
