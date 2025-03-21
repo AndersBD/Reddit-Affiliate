@@ -36,7 +36,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <div className="flex-1 overflow-x-hidden flex flex-col">
         <Header />
-        <main className="p-4 md:p-6 bg-gray-100 dark:bg-gray-900 flex-grow">{children}</main>
+        <main className="p-4 md:p-6 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex-grow">{children}</main>
       </div>
     </div>
   );
