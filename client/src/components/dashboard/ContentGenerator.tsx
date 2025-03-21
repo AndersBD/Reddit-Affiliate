@@ -94,7 +94,7 @@ const ContentGenerator = () => {
   };
 
   return (
-    <Card className="fade-in" style={{ animationDelay: "0.7s" }}>
+    <Card className="fade-in bg-card" style={{ animationDelay: "0.7s" }}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-2xl font-semibold leading-none tracking-tight">AI Content Generator</h3>
