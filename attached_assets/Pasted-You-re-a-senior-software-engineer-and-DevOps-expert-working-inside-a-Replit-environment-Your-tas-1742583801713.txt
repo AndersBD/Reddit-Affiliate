@@ -1,0 +1,76 @@
+You're a senior software engineer and DevOps expert working inside a Replit environment.
+
+Your task is to:
+✅ Review the current codebase for structural, logic, and quality issues  
+✅ Set up a complete local and GitHub-integrated quality assurance system  
+✅ Improve developer experience with formatting, linting, testing, CI workflows, and documentation
+
+---
+
+# PART 1: CODE REVIEW
+1. Analyze all files for:
+   - Code duplication
+   - Bad naming, unclear functions, or overly long methods
+   - Missing error handling
+   - Untested or fragile logic
+   - Security risks in API calls or secrets usage
+2. Summarize all issues found and group them by file
+
+# PART 2: TOOLING & CODE QUALITY SETUP
+Set up the following (based on project language):
+
+🧹 Formatters:
+- Python: Install and configure **Black**
+- JS/React: Use **Prettier**
+
+🔍 Linters:
+- Python: Install and configure **Flake8**
+- JS: Use **ESLint** with recommended config
+
+🧪 Tests:
+- Python: Install **pytest**, create a `/tests/` folder with at least 1 sample test
+- JS: Use **Jest** or **Vitest**, include example test
+
+📊 Coverage:
+- Python: Use **coverage.py** and generate an HTML report
+- JS: Use Jest's coverage tools
+- Optional: Add badge to README
+
+🚀 GitHub Integration:
+- Use the GitHub token (via Replit Secrets) to connect to repo:
+  - Pull latest if repo exists
+  - Push current code
+  - Create `.github/workflows/ci.yml` for GitHub Actions:
+    - Run lint, test, and generate coverage report on push or PR
+
+📦 Package Management:
+- Ensure `requirements.txt` or `package.json` includes all relevant packages
+
+🛠 DX Improvements:
+- Create or improve `.gitignore`, `README.md`, and code comments
+- Log clear TODOs in code for any parts needing future refactor
+
+---
+
+# OUTPUT FORMAT (Structured JSON)
+{
+  "code_review_summary": [
+    { "file": "scheduler.py", "issue": "Function `post_to_reddit()` is too large. Split into 3 units." },
+    { "file": "main.py", "issue": "Missing try/except around Reddit API call." }
+  ],
+  "tools_setup": {
+    "formatter": "✅ Black installed and applied",
+    "linter": "✅ Flake8 configured with custom .flake8 rules",
+    "testing": "✅ Pytest added with tests/test_scheduler.py",
+    "coverage": "✅ coverage.py report generated",
+    "github": "✅ Pushed to repo and added CI workflow",
+    "ci_pipeline": "✅ GitHub Actions setup to lint, test, and report coverage",
+    "readme": "✅ Updated with setup instructions and coverage badge"
+  },
+  "next_steps": [
+    "Add more unit tests to improve coverage",
+    "Refactor long methods identified in code review",
+    "Review CI test times for optimization"
+  ],
+  "status": "✅ Setup complete and pushed to GitHub"
+}
