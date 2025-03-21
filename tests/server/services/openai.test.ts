@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from 'vitest';
+import { describe, test, expect, vi, beforeEach } from 'vitest';
 
 // Directly mock the service functions
 vi.mock('../../../server/services/openai', () => ({
