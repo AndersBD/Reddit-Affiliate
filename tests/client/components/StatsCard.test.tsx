@@ -1,7 +1,9 @@
 import { describe, test, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 import StatsCard from '../../../client/src/components/dashboard/StatsCard';
 import { ArrowUp, TrendingUp } from 'lucide-react';
+import '@testing-library/jest-dom';
 
 describe('StatsCard Component', () => {
   beforeEach(() => {

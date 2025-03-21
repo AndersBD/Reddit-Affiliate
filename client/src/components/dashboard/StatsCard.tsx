@@ -25,6 +25,7 @@ const StatsCard = ({
 }: StatsCardProps) => {
   return (
     <Card 
+      data-testid="stats-card"
       className="fade-in bg-white dark:bg-gray-800 dark:border-gray-700"
       style={{ 
         animationDelay: animationDelay,

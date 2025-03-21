@@ -20,8 +20,3 @@ vi.mock('process', () => ({
     REDDIT_PASSWORD: 'test-password',
   },
 }));
-
-// Reset all mocks before each test
-beforeEach(() => {
-  vi.resetAllMocks();
-});
