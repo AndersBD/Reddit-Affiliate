@@ -28,7 +28,7 @@ const ScheduleManager = () => {
   // Today's date at midnight
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   // Tomorrow's date at midnight
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -38,11 +38,11 @@ const ScheduleManager = () => {
     ? scheduledPosts.map((post: ScheduledPost) => {
         // Add campaign name
         const campaign = campaigns.find((c: any) => c.id === post.campaignId);
-        
+
         // Check if the scheduled time is today or tomorrow
         const postDate = new Date(post.scheduledTime);
         let timeDisplay = "";
-        
+
         if (postDate >= today && postDate < tomorrow) {
           timeDisplay = `Today, ${formatTime(postDate)}`;
         } else if (postDate >= tomorrow && postDate < new Date(tomorrow.getTime() + 86400000)) {
@@ -50,7 +50,7 @@ const ScheduleManager = () => {
         } else {
           timeDisplay = formatDate(postDate);
         }
-        
+
         return {
           ...post,
           campaignName: campaign?.name || "Unknown Campaign",
@@ -77,7 +77,7 @@ const ScheduleManager = () => {
   }
 
   return (
-    <Card className="fade-in bg-white dark:bg-gray-800 dark:border-gray-700" style={{ animationDelay: "0.8s" }}>
+    <Card className="fade-in bg-white dark:bg-gray-800" style={{ animationDelay: "0.8s" }}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-heading font-semibold text-primary-800 dark:text-primary-300">Schedule Posts</h3>
@@ -85,11 +85,11 @@ const ScheduleManager = () => {
             {isLoading ? "Loading..." : `${sortedPosts.length} pending`}
           </Badge>
         </div>
-        
+
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
           Upcoming scheduled posts across all campaigns.
         </p>
-        
+
         <div className="space-y-3 max-h-[200px] overflow-y-auto">
           {isLoading ? (
             // Loading skeleton
@@ -138,7 +138,7 @@ const ScheduleManager = () => {
             </div>
           )}
         </div>
-        
+
         <Button 
           variant="outline" 
           className="w-full mt-4 flex items-center justify-center"

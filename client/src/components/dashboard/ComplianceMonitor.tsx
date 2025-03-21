@@ -12,7 +12,7 @@ const ComplianceMonitor = () => {
   });
 
   return (
-    <Card className="fade-in" style={{ animationDelay: "0.9s" }}>
+    <Card className="fade-in bg-white dark:bg-gray-800" style={{ animationDelay: "0.9s" }}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-heading font-semibold text-primary-800">Compliance Monitor</h3>
