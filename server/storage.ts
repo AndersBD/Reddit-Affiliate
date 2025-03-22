@@ -1796,5 +1796,5 @@ export class FileStorage implements IStorage {
   }
 }
 
-// Switch to PostgreSQL for persistent storage
-export const storage = new FileStorage();
+// Use MemStorage for development
+export const storage = new MemStorage();
