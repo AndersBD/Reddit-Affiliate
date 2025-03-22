@@ -837,6 +837,152 @@ export class MemStorage implements IStorage {
     this.users.set(id, updatedUser);
     return updatedUser;
   }
+
+  // Keywords
+  async getKeywords(): Promise<Keyword[]> {
+    return Array.from(this.keywords.values());
+  }
+
+  async getKeyword(id: number): Promise<Keyword | undefined> {
+    return this.keywords.get(id);
+  }
+
+  async getKeywordByText(keyword: string): Promise<Keyword | undefined> {
+    return Array.from(this.keywords.values()).find(k => k.keyword.toLowerCase() === keyword.toLowerCase());
+  }
+
+  async getKeywordsByCampaign(campaignId: number): Promise<Keyword[]> {
+    return Array.from(this.keywords.values()).filter(k => k.campaignId === campaignId);
+  }
+
+  async getKeywordsByAffiliateProgram(affiliateProgramId: number): Promise<Keyword[]> {
+    return Array.from(this.keywords.values()).filter(k => k.affiliateProgramId === affiliateProgramId);
+  }
+
+  async createKeyword(keyword: InsertKeyword): Promise<Keyword> {
+    const id = ++this.currentIds.keywords;
+    const timestamp = new Date();
+    const newKeyword: Keyword = { ...keyword, id, createdAt: timestamp };
+    this.keywords.set(id, newKeyword);
+    return newKeyword;
+  }
+
+  async updateKeyword(id: number, keyword: Partial<InsertKeyword>): Promise<Keyword | undefined> {
+    const existingKeyword = this.keywords.get(id);
+    if (!existingKeyword) {
+      return undefined;
+    }
+
+    const updatedKeyword: Keyword = { ...existingKeyword, ...keyword };
+    this.keywords.set(id, updatedKeyword);
+    return updatedKeyword;
+  }
+
+  async deleteKeyword(id: number): Promise<boolean> {
+    return this.keywords.delete(id);
+  }
+
+  // Reddit Opportunities
+  async getRedditOpportunities(limit: number = 100): Promise<RedditOpportunity[]> {
+    const opportunities = Array.from(this.redditOpportunities.values());
+    return opportunities.slice(0, limit);
+  }
+
+  async getRedditOpportunitiesByKeyword(keywordId: number): Promise<RedditOpportunity[]> {
+    return Array.from(this.redditOpportunities.values()).filter(o => o.keywordId === keywordId);
+  }
+
+  async getRedditOpportunitiesByStatus(status: string): Promise<RedditOpportunity[]> {
+    return Array.from(this.redditOpportunities.values()).filter(o => o.status === status);
+  }
+
+  async getRedditOpportunity(id: number): Promise<RedditOpportunity | undefined> {
+    return this.redditOpportunities.get(id);
+  }
+
+  async getRedditOpportunityByUrl(url: string): Promise<RedditOpportunity | undefined> {
+    return Array.from(this.redditOpportunities.values()).find(o => o.url === url);
+  }
+
+  async createRedditOpportunity(opportunity: InsertRedditOpportunity): Promise<RedditOpportunity> {
+    const id = ++this.currentIds.redditOpportunities;
+    const timestamp = new Date();
+    const newOpportunity: RedditOpportunity = { ...opportunity, id, createdAt: timestamp };
+    this.redditOpportunities.set(id, newOpportunity);
+    return newOpportunity;
+  }
+
+  async updateRedditOpportunity(id: number, opportunity: Partial<InsertRedditOpportunity>): Promise<RedditOpportunity | undefined> {
+    const existingOpportunity = this.redditOpportunities.get(id);
+    if (!existingOpportunity) {
+      return undefined;
+    }
+
+    const updatedOpportunity: RedditOpportunity = { ...existingOpportunity, ...opportunity };
+    this.redditOpportunities.set(id, updatedOpportunity);
+    return updatedOpportunity;
+  }
+
+  async deleteRedditOpportunity(id: number): Promise<boolean> {
+    return this.redditOpportunities.delete(id);
+  }
+
+  async getTopOpportunities(limit: number = 5): Promise<RedditOpportunity[]> {
+    const opportunities = Array.from(this.redditOpportunities.values())
+      .filter(o => o.status === 'new')
+      .sort((a, b) => (b.opportunityScore || 0) - (a.opportunityScore || 0));
+    
+    return opportunities.slice(0, limit);
+  }
+
+  // Content Queue
+  async getContentQueueItems(): Promise<ContentQueueItem[]> {
+    return Array.from(this.contentQueue.values());
+  }
+
+  async getContentQueueItemsByCampaign(campaignId: number): Promise<ContentQueueItem[]> {
+    return Array.from(this.contentQueue.values()).filter(item => item.campaignId === campaignId);
+  }
+
+  async getContentQueueItemsByOpportunity(opportunityId: number): Promise<ContentQueueItem[]> {
+    return Array.from(this.contentQueue.values()).filter(item => item.opportunityId === opportunityId);
+  }
+
+  async getContentQueueItemsByStatus(status: string): Promise<ContentQueueItem[]> {
+    return Array.from(this.contentQueue.values()).filter(item => item.status === status);
+  }
+
+  async getContentQueueItem(id: number): Promise<ContentQueueItem | undefined> {
+    return this.contentQueue.get(id);
+  }
+
+  async createContentQueueItem(item: InsertContentQueueItem): Promise<ContentQueueItem> {
+    const id = ++this.currentIds.contentQueue;
+    const timestamp = new Date();
+    const newItem: ContentQueueItem = { ...item, id, createdAt: timestamp };
+    this.contentQueue.set(id, newItem);
+    return newItem;
+  }
+
+  async updateContentQueueItem(id: number, item: Partial<InsertContentQueueItem>): Promise<ContentQueueItem | undefined> {
+    const existingItem = this.contentQueue.get(id);
+    if (!existingItem) {
+      return undefined;
+    }
+
+    const updatedItem: ContentQueueItem = { ...existingItem, ...item };
+    this.contentQueue.set(id, updatedItem);
+    return updatedItem;
+  }
+
+  async deleteContentQueueItem(id: number): Promise<boolean> {
+    return this.contentQueue.delete(id);
+  }
+
+  async getPendingContentQueueItems(): Promise<ContentQueueItem[]> {
+    return Array.from(this.contentQueue.values())
+      .filter(item => item.status === 'pending' && (item.scheduledTime && new Date(item.scheduledTime) <= new Date()));
+  }
 }
 
 export class FileStorage implements IStorage {
