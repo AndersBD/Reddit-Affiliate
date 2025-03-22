@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
 import { 
@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import SchedulingCalendar from "@/components/scheduling/SchedulingCalendar";
 import ScheduleForm from "@/components/scheduling/ScheduleForm";
+import PageWrapper from "@/components/layout/PageWrapper";
 
 const Scheduling = () => {
   const [matchParams, params] = useRoute("/scheduling/:id");
@@ -30,15 +31,15 @@ const Scheduling = () => {
   const [location] = useLocation();
 
   // Get URL parameter
-  const searchParams = new URLSearchParams(location.split('?')[1]);
+  const searchParams = new URLSearchParams(location.split('?')[1] || "");
   const campaignIdParam = searchParams.get('campaignId');
 
   // Set the selected campaign from URL parameter
-  useState(() => {
+  useEffect(() => {
     if (campaignIdParam && !selectedCampaign) {
       setSelectedCampaign(campaignIdParam);
     }
-  });
+  }, [campaignIdParam, selectedCampaign]);
 
   // Fetch data
   const { data: campaigns, isLoading: campaignsLoading } = useQuery({
@@ -66,29 +67,30 @@ const Scheduling = () => {
   if (matchNew) {
     return <ScheduleForm />;
   }
+  
+  // Create the actions button for the PageWrapper
+  const scheduleButton = (
+    <Button asChild>
+      <a href="/scheduling/new">
+        <PlusCircle className="mr-2 h-4 w-4" />
+        Schedule New Post
+      </a>
+    </Button>
+  );
 
   return (
-    <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold font-heading text-primary-800">Scheduling</h1>
-          <p className="text-gray-600">Plan and schedule your Reddit posts for optimal engagement</p>
-        </div>
-        <Button className="mt-3 sm:mt-0" asChild>
-          <a href="/scheduling/new">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Schedule New Post
-          </a>
-        </Button>
-      </div>
-
+    <PageWrapper
+      title="Scheduling"
+      description="Plan and schedule your Reddit posts for optimal engagement"
+      actions={scheduleButton}
+    >
       <div className="flex flex-col md:flex-row items-start md:items-center space-y-3 md:space-y-0 md:space-x-4 mb-4">
         <Select value={selectedCampaign} onValueChange={setSelectedCampaign}>
           <SelectTrigger className="w-full md:w-[200px]">
             <SelectValue placeholder="All Campaigns" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Campaigns</SelectItem>
+            <SelectItem value="all-campaigns">All Campaigns</SelectItem>
             {!campaignsLoading && campaigns?.map((campaign: any) => (
               <SelectItem key={campaign.id} value={campaign.id.toString()}>
                 {campaign.name}
@@ -203,7 +205,7 @@ const Scheduling = () => {
           </TabsContent>
         </Tabs>
       )}
-    </>
+    </PageWrapper>
   );
 };
 

@@ -304,7 +304,7 @@ const ScheduleForm = ({ postId }: ScheduleFormProps) => {
                           </FormControl>
                           <SelectContent>
                             {timezones.map((timezone) => (
-                              <SelectItem key={timezone} value={timezone}>
+                              <SelectItem key={timezone} value={timezone || "default-timezone"}>
                                 {timezone}
                               </SelectItem>
                             ))}
