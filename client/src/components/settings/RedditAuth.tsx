@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { getRedditAuthStatus, disconnectRedditAccount, getRedditAuthUrl } from "@/lib/api";
 import { AlertCircle, CheckCircle2, ExternalLink, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -22,15 +23,14 @@ export function RedditAuth() {
   const { data: authStatus, isLoading: isAuthLoading, refetch } = useQuery<AuthStatus>({
     queryKey: ["/api/auth/reddit/status"],
     queryFn: async () => {
-      const res = await fetch("/api/auth/reddit/status");
-      return res.json();
+      return await getRedditAuthStatus();
     }
   });
 
   // Mutation to disconnect Reddit account
   const disconnectMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("/api/auth/reddit/disconnect", "POST");
+      return await disconnectRedditAccount();
     },
     onSuccess: () => {
       toast({
@@ -44,7 +44,7 @@ export function RedditAuth() {
     onError: (error) => {
       toast({
         title: "Error",
-        description: `Failed to disconnect Reddit account: ${error.message}`,
+        description: `Failed to disconnect Reddit account: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
       });
     }
@@ -54,8 +54,7 @@ export function RedditAuth() {
     setLoading(true);
     try {
       // Get the authorization URL from our API
-      const response = await fetch("/api/auth/reddit/authorize");
-      const data = await response.json();
+      const data = await getRedditAuthUrl();
       
       if (data.authUrl) {
         // Open Reddit OAuth authorization page in a new window
