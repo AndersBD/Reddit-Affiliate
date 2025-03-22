@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, doublePrecision, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -177,3 +177,79 @@ export type InsertContentTemplate = z.infer<typeof insertContentTemplateSchema>;
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+
+// Keywords for SERP scraping
+export const keywords = pgTable("keywords", {
+  id: serial("id").primaryKey(),
+  keyword: text("keyword").notNull().unique(),
+  status: text("status").notNull().default("active"), // active, paused, completed
+  campaignId: integer("campaign_id"), // Optional linkage to campaign
+  affiliateProgramId: integer("affiliate_program_id"), // Optional linkage to affiliate program
+  lastScanned: timestamp("last_scanned"),
+  dateAdded: timestamp("date_added").defaultNow(),
+});
+
+export const insertKeywordSchema = createInsertSchema(keywords).omit({
+  id: true,
+  dateAdded: true,
+  lastScanned: true,
+});
+
+// Reddit opportunities found through SERP scraping
+export const redditOpportunities = pgTable("reddit_opportunities", {
+  id: serial("id").primaryKey(),
+  keywordId: integer("keyword_id").notNull(),
+  keyword: text("keyword").notNull(),
+  redditPostUrl: text("reddit_post_url").notNull().unique(),
+  title: text("title").notNull(),
+  snippet: text("snippet"),
+  serpRank: integer("serp_rank"),
+  postDate: timestamp("post_date"),
+  upvotes: integer("upvotes"),
+  subreddit: text("subreddit").notNull(),
+  linkable: boolean("linkable").default(true),
+  opportunityScore: doublePrecision("opportunity_score"),
+  actionType: text("action_type"), // comment, post
+  status: text("status").notNull().default("new"), // new, queued, processed, rejected
+  dateDiscovered: timestamp("date_discovered").defaultNow(),
+  dateProcessed: timestamp("date_processed"),
+});
+
+export const insertRedditOpportunitySchema = createInsertSchema(redditOpportunities).omit({
+  id: true,
+  dateDiscovered: true,
+  dateProcessed: true,
+});
+
+// Content queue for scheduling posts/comments
+export const contentQueue = pgTable("content_queue", {
+  id: serial("id").primaryKey(),
+  opportunityId: integer("opportunity_id"),
+  campaignId: integer("campaign_id"),
+  type: text("type").notNull(), // comment, post
+  subreddit: text("subreddit").notNull(),
+  targetUrl: text("target_url"), // URL of post to comment on (if type=comment)
+  content: text("content").notNull(),
+  scheduledFor: timestamp("scheduled_for").notNull(),
+  status: text("status").notNull().default("scheduled"), // scheduled, posted, failed
+  redditPostId: text("reddit_post_id"), // Actual ID once posted
+  dateCreated: timestamp("date_created").defaultNow(),
+  datePosted: timestamp("date_posted"),
+});
+
+export const insertContentQueueSchema = createInsertSchema(contentQueue).omit({
+  id: true,
+  dateCreated: true,
+  datePosted: true,
+  redditPostId: true,
+});
+
+// Type exports for the new tables
+export type Keyword = typeof keywords.$inferSelect;
+export type InsertKeyword = z.infer<typeof insertKeywordSchema>;
+
+export type RedditOpportunity = typeof redditOpportunities.$inferSelect;
+export type InsertRedditOpportunity = z.infer<typeof insertRedditOpportunitySchema>;
+
+export type ContentQueueItem = typeof contentQueue.$inferSelect;
+export type InsertContentQueueItem = z.infer<typeof insertContentQueueSchema>;
