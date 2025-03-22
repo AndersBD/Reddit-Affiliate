@@ -119,8 +119,8 @@ const Scheduling = () => {
           <span className="ml-2">Loading schedule data...</span>
         </div>
       ) : (
-        <>
-          <TabsContent value="calendar" className={selectedView === "calendar" ? "block" : "hidden"}>
+        <Tabs value={selectedView} onValueChange={setSelectedView}>
+          <TabsContent value="calendar">
             <Card>
               <CardHeader>
                 <CardTitle>Posting Calendar</CardTitle>
@@ -134,7 +134,7 @@ const Scheduling = () => {
             </Card>
           </TabsContent>
           
-          <TabsContent value="list" className={selectedView === "list" ? "block" : "hidden"}>
+          <TabsContent value="list">
             <Card>
               <CardHeader>
                 <CardTitle>Scheduled Posts</CardTitle>
@@ -201,7 +201,7 @@ const Scheduling = () => {
               </CardContent>
             </Card>
           </TabsContent>
-        </>
+        </Tabs>
       )}
     </>
   );
