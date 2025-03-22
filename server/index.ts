@@ -2,10 +2,25 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeDatabase } from "./db";
+import session from "express-session";
+import { randomBytes } from "crypto";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Set up session middleware with secure cookie
+app.use(session({
+  secret: process.env.SESSION_SECRET || randomBytes(32).toString('hex'),
+  name: 'reddit_auth_session',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
 
 app.use((req, res, next) => {
   const start = Date.now();

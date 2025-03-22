@@ -30,7 +30,7 @@ export function RedditAuth() {
   // Mutation to disconnect Reddit account
   const disconnectMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("/api/auth/reddit/disconnect", { method: "POST" });
+      return await apiRequest("/api/auth/reddit/disconnect", "POST");
     },
     onSuccess: () => {
       toast({
