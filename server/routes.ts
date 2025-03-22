@@ -376,6 +376,167 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error checking content compliance" });
     }
   });
+  
+  // Autonomous Content Pipeline Routes
+  const contentAgent = new AutonomousContentAgent();
+  
+  // Phase 1: Research & Discovery
+  apiRouter.post("/content-pipeline/research", async (req, res) => {
+    try {
+      const { keyword, productName } = req.body;
+      
+      if (!keyword || !productName) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      // Run research phase
+      const researchResults = await contentAgent.research(keyword, productName);
+      
+      // Log activity
+      await storage.createActivity({
+        type: "content",
+        message: `Research completed for keyword: ${keyword}`,
+        details: { keyword, productName, opportunityScore: researchResults.opportunityScore }
+      });
+      
+      res.json(researchResults);
+    } catch (error) {
+      console.error("Error in research phase:", error);
+      res.status(500).json({ message: "Error in research phase" });
+    }
+  });
+  
+  // Phase 2: Comment & Inject
+  apiRouter.post("/content-pipeline/comment", async (req, res) => {
+    try {
+      const { researchData, affiliateInfo } = req.body;
+      
+      if (!researchData || !affiliateInfo) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      // Run comment phase
+      const commentResults = await contentAgent.comment(researchData, affiliateInfo);
+      
+      // Log activity
+      await storage.createActivity({
+        type: "content",
+        message: `Comment generated for post: ${commentResults.originalPostUrl.substring(0, 40)}...`,
+        details: { 
+          postUrl: commentResults.originalPostUrl,
+          engagement: commentResults.expectedEngagement
+        }
+      });
+      
+      res.json(commentResults);
+    } catch (error) {
+      console.error("Error in comment phase:", error);
+      res.status(500).json({ message: "Error in comment phase" });
+    }
+  });
+  
+  // Phase 3: Outranking Post Creation
+  apiRouter.post("/content-pipeline/create-post", async (req, res) => {
+    try {
+      const { researchData, affiliateInfo } = req.body;
+      
+      if (!researchData || !affiliateInfo) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      // Run post creation phase
+      const postResults = await contentAgent.createPost(researchData, affiliateInfo);
+      
+      // Log activity
+      await storage.createActivity({
+        type: "content",
+        message: `Post created for subreddit r/${postResults.targetSubreddit}: ${postResults.title}`,
+        details: { 
+          title: postResults.title,
+          subreddit: postResults.targetSubreddit,
+          performance: postResults.expectedPerformance
+        }
+      });
+      
+      res.json(postResults);
+    } catch (error) {
+      console.error("Error in post creation phase:", error);
+      res.status(500).json({ message: "Error in post creation phase" });
+    }
+  });
+  
+  // Phase 4: Keyword/Niche Looping
+  apiRouter.post("/content-pipeline/loop-keywords", async (req, res) => {
+    try {
+      const { completedKeywords, productCategory } = req.body;
+      
+      if (!completedKeywords || !productCategory) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      // Run keyword loop phase
+      const keywordResults = await contentAgent.loopKeywords(completedKeywords, productCategory);
+      
+      // Log activity
+      await storage.createActivity({
+        type: "content",
+        message: `Keyword loop analysis completed for ${productCategory}`,
+        details: { 
+          processedKeywords: keywordResults.processedKeywords,
+          recommendedKeywords: keywordResults.recommendedNextKeywords
+        },
+        timestamp: new Date()
+      });
+      
+      res.json(keywordResults);
+    } catch (error) {
+      console.error("Error in keyword loop phase:", error);
+      res.status(500).json({ message: "Error in keyword loop phase" });
+    }
+  });
+  
+  // Complete Content Pipeline (all phases)
+  apiRouter.post("/content-pipeline/complete", async (req, res) => {
+    try {
+      const { keyword, productName, affiliateInfo, productCategory } = req.body;
+      
+      if (!keyword || !productName || !affiliateInfo || !productCategory) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      // Run all phases in sequence
+      const researchResults = await contentAgent.research(keyword, productName);
+      const commentResults = await contentAgent.comment(researchResults, affiliateInfo);
+      const postResults = await contentAgent.createPost(researchResults, affiliateInfo);
+      
+      // Add the current keyword to completed keywords
+      const completedKeywords = [keyword];
+      const keywordResults = await contentAgent.loopKeywords(completedKeywords, productCategory);
+      
+      // Log activity
+      await storage.createActivity({
+        type: "content",
+        message: `Complete content pipeline executed for ${keyword}`,
+        details: { 
+          keyword,
+          productName,
+          opportunityScore: researchResults.opportunityScore
+        },
+        timestamp: new Date()
+      });
+      
+      // Return all results
+      res.json({
+        research: researchResults,
+        comment: commentResults,
+        post: postResults,
+        keywords: keywordResults
+      });
+    } catch (error) {
+      console.error("Error in complete content pipeline:", error);
+      res.status(500).json({ message: "Error in complete content pipeline" });
+    }
+  });
 
   // Reddit Post Routes
   apiRouter.get("/reddit-posts", async (req, res) => {
