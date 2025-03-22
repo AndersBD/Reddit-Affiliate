@@ -12,8 +12,19 @@ import {
 } from "./services/openai";
 import { createRedditPost, postComment, getSubredditPosts, getPostComments, getSubredditInfo, updatePostStats, getApiUsageStatus, analyzeBestPostingTime } from "./services/reddit";
 import { schedulePost, cancelScheduledPost, reschedulePost, getScheduledPosts, schedulePostsForCampaign, initializeScheduler } from "./services/scheduler";
+import { searchRedditOpportunities, batchProcessKeywords, scoreAndQueueOpportunities } from "./services/serp-scraper";
+import { triggerOpportunityProcessing, initializeOpportunityScheduler, triggerKeywordScan, triggerOpportunityScoring } from "./services/opportunity-scheduler";
 import { z } from "zod";
-import { insertAffiliateProgramSchema, insertCampaignSchema, insertRedditPostSchema, insertSubredditSchema, insertContentTemplateSchema } from "@shared/schema";
+import { 
+  insertAffiliateProgramSchema, 
+  insertCampaignSchema, 
+  insertRedditPostSchema, 
+  insertSubredditSchema, 
+  insertContentTemplateSchema,
+  insertKeywordSchema,
+  insertRedditOpportunitySchema,
+  insertContentQueueSchema
+} from "@shared/schema";
 import authRoutes from "./routes/index";
 
 export async function registerRoutes(app: Express): Promise<Server> {

@@ -133,3 +133,61 @@ export const disconnectRedditAccount = async () => {
   const response = await apiRequest("POST", "/api/auth/reddit/disconnect", {});
   return response.json();
 };
+
+// Keyword API
+export const createKeyword = async (data: any) => {
+  const response = await apiRequest("POST", "/api/keywords", data);
+  return response.json();
+};
+
+export const updateKeyword = async (id: number, data: any) => {
+  const response = await apiRequest("PATCH", `/api/keywords/${id}`, data);
+  return response.json();
+};
+
+export const deleteKeyword = async (id: number) => {
+  await apiRequest("DELETE", `/api/keywords/${id}`);
+  return { success: true };
+};
+
+// Opportunity API
+export const getOpportunities = async (status?: string) => {
+  const url = status ? `/api/opportunities?status=${status}` : '/api/opportunities';
+  const response = await fetch(url, {
+    credentials: "include",
+  });
+  return response.json();
+};
+
+export const getOpportunity = async (id: number) => {
+  const response = await fetch(`/api/opportunities/${id}`, {
+    credentials: "include",
+  });
+  return response.json();
+};
+
+export const updateOpportunity = async (id: number, data: any) => {
+  const response = await apiRequest("PATCH", `/api/opportunities/${id}`, data);
+  return response.json();
+};
+
+export const triggerOpportunityScan = async () => {
+  const response = await apiRequest("POST", "/api/opportunities/scan", {});
+  return response.json();
+};
+
+// Content Queue API
+export const createContentQueueItem = async (data: any) => {
+  const response = await apiRequest("POST", "/api/content-queue", data);
+  return response.json();
+};
+
+export const updateContentQueueItem = async (id: number, data: any) => {
+  const response = await apiRequest("PATCH", `/api/content-queue/${id}`, data);
+  return response.json();
+};
+
+export const deleteContentQueueItem = async (id: number) => {
+  await apiRequest("DELETE", `/api/content-queue/${id}`);
+  return { success: true };
+};

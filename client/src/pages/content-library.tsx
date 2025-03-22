@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useLocation, useRoute } from "wouter";
+import { useLocation, useRoute, Link } from "wouter";
 import { 
   Tabs, 
   TabsContent, 
@@ -13,6 +13,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
+  CardDescription
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +30,14 @@ import {
   Save, 
   Calendar, 
   CheckCircle, 
-  AlertCircle 
+  AlertCircle,
+  BarChart3,
+  RefreshCw,
+  Target,
+  Star,
+  MessageSquare,
+  FileText,
+  ArrowUpRight
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -655,6 +663,236 @@ const ContentLibrary = () => {
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Create Content
                 </Button>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="opportunities">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+            {/* Summary Cards */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Keywords Tracked</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <div className="mr-2 rounded-full p-2 bg-blue-100">
+                    <Target className="h-4 w-4 text-blue-700" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold">
+                      {keywordsLoading ? (
+                        <Skeleton className="h-8 w-16" />
+                      ) : (
+                        keywords?.length || 0
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Active monitoring</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">New Opportunities</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <div className="mr-2 rounded-full p-2 bg-green-100">
+                    <ArrowUpRight className="h-4 w-4 text-green-700" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold">
+                      {opportunitiesLoading ? (
+                        <Skeleton className="h-8 w-16" />
+                      ) : (
+                        opportunities?.filter((o: any) => o.status === 'new').length || 0
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Waiting for review</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <div className="mr-2 rounded-full p-2 bg-orange-100">
+                    <RefreshCw className="h-4 w-4 text-orange-700" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold">
+                      {opportunitiesLoading ? (
+                        <Skeleton className="h-8 w-16" />
+                      ) : (
+                        opportunities?.filter((o: any) => o.status === 'queued' || o.status === 'processing').length || 0
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Content being created</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Completed</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <div className="mr-2 rounded-full p-2 bg-purple-100">
+                    <CheckCircle className="h-4 w-4 text-purple-700" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold">
+                      {opportunitiesLoading ? (
+                        <Skeleton className="h-8 w-16" />
+                      ) : (
+                        opportunities?.filter((o: any) => o.status === 'completed').length || 0
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Ready for posting</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-medium">Content Opportunities</h3>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Scan for New
+              </Button>
+              <Button size="sm">
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Add Keyword
+              </Button>
+            </div>
+          </div>
+          
+          <Tabs defaultValue="all" className="mb-6">
+            <TabsList>
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="new">New</TabsTrigger>
+              <TabsTrigger value="queued">Queued</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          <div className="space-y-4">
+            {opportunitiesLoading ? (
+              // Loading skeletons
+              Array(3).fill(0).map((_, index) => (
+                <Card key={index}>
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <Skeleton className="h-5 w-48 mb-1" />
+                        <Skeleton className="h-4 w-32" />
+                      </div>
+                      <Skeleton className="h-6 w-16" />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <Skeleton className="h-12 w-full" />
+                    <div className="flex justify-between mt-4">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-end pt-2">
+                    <Skeleton className="h-9 w-24 mr-2" />
+                    <Skeleton className="h-9 w-24" />
+                  </CardFooter>
+                </Card>
+              ))
+            ) : opportunities?.length > 0 ? (
+              // Opportunity cards
+              opportunities.map((opportunity: any) => (
+                <Card key={opportunity.id} className={opportunity.status === 'new' ? 'border-l-4 border-l-blue-500' : ''}>
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-center">
+                      <div className="flex-1">
+                        <div className="flex items-center">
+                          <h4 className="text-base font-semibold">{opportunity.title || 'Reddit Opportunity'}</h4>
+                          <Badge variant={
+                            opportunity.status === 'new' ? 'default' : 
+                            opportunity.status === 'queued' ? 'outline' :
+                            opportunity.status === 'processing' ? 'secondary' :
+                            opportunity.status === 'completed' ? 'success' : 'outline'
+                          } className="ml-2">
+                            {opportunity.status}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500 mt-1">
+                          <Target className="h-3 w-3 mr-1" />
+                          {opportunity.keyword}
+                          <span className="mx-2">•</span>
+                          <MessageSquare className="h-3 w-3 mr-1" />
+                          {opportunity.subreddit}
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="text-xs font-semibold bg-amber-50">
+                        <Star className="h-3 w-3 mr-1 text-amber-500" />
+                        Score: {opportunity.opportunityScore || 0}/100
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <p className="text-sm line-clamp-2">
+                      {opportunity.snippet || 'No description available'}
+                    </p>
+                    <div className="flex justify-between mt-3 text-xs text-gray-500">
+                      <div>
+                        <BarChart3 className="h-3 w-3 inline mr-1" />
+                        {opportunity.rank ? `Rank: ${opportunity.rank}` : 'Rank: N/A'}
+                      </div>
+                      <div>
+                        <FileText className="h-3 w-3 inline mr-1" />
+                        Action type: {opportunity.actionType || 'Comment'}
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="pt-2 flex justify-end">
+                    <Button variant="outline" size="sm" className="mr-2">
+                      <a href={opportunity.url} target="_blank" rel="noopener noreferrer" className="flex items-center">
+                        View on Reddit
+                        <ArrowUpRight className="h-3 w-3 ml-1" />
+                      </a>
+                    </Button>
+                    <Button size="sm">
+                      Generate Content
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center p-12 bg-gray-50 rounded-lg">
+                <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <Target className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">No opportunities found</h3>
+                <p className="text-gray-500 max-w-md mx-auto mb-6">
+                  We haven't discovered any content opportunities yet. Try adding keywords related to your products or starting a scan.
+                </p>
+                <div className="flex justify-center space-x-4">
+                  <Button variant="outline">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Keywords
+                  </Button>
+                  <Button>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Start Scan
+                  </Button>
+                </div>
               </div>
             )}
           </div>
