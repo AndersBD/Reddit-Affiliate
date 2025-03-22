@@ -1,8 +1,4 @@
 import { Pool } from 'pg';
-import { config } from 'dotenv';
-
-// Load environment variables
-config();
 
 // PostgreSQL connection pool
 export const pool = new Pool({
@@ -19,90 +15,99 @@ export async function initializeDatabase() {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS affiliate_programs (
         id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
+        name TEXT NOT NULL,
         description TEXT,
-        website VARCHAR(255),
-        commission_rate DECIMAL,
-        commission_type VARCHAR(255),
-        payout_threshold DECIMAL,
-        payout_frequency VARCHAR(255),
-        category VARCHAR(255),
+        website TEXT,
+        commission_rate DOUBLE PRECISION,
+        commission_type TEXT,
+        payout_threshold DOUBLE PRECISION,
+        payout_frequency TEXT,
+        category TEXT,
         active BOOLEAN DEFAULT true,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT NOW()
       );
 
       CREATE TABLE IF NOT EXISTS subreddits (
         id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL UNIQUE,
+        name TEXT NOT NULL UNIQUE,
         description TEXT,
         subscribers INTEGER,
-        active BOOLEAN DEFAULT true,
-        post_frequency VARCHAR(255),
-        best_time_to_post VARCHAR(255),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        posting_rules TEXT,
+        best_time_to_post TEXT,
+        category_tags TEXT[],
+        created_at TIMESTAMP DEFAULT NOW()
       );
 
       CREATE TABLE IF NOT EXISTS campaigns (
         id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        affiliate_program_id INTEGER REFERENCES affiliate_programs(id),
-        status VARCHAR(50) DEFAULT 'draft',
+        name TEXT NOT NULL,
+        affiliate_program_id INTEGER NOT NULL,
+        description TEXT,
         target_subreddits TEXT[],
+        status TEXT NOT NULL,
+        start_date TIMESTAMP,
+        end_date TIMESTAMP,
+        budget DOUBLE PRECISION,
         schedule JSONB,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT NOW()
       );
 
       CREATE TABLE IF NOT EXISTS reddit_posts (
         id SERIAL PRIMARY KEY,
-        campaign_id INTEGER REFERENCES campaigns(id),
-        title VARCHAR(300) NOT NULL,
-        content TEXT,
-        subreddit VARCHAR(255) NOT NULL,
+        campaign_id INTEGER NOT NULL,
+        subreddit_name TEXT NOT NULL,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        status TEXT NOT NULL,
+        post_type TEXT NOT NULL,
+        reddit_post_id TEXT,
         scheduled_time TIMESTAMP,
         posted_time TIMESTAMP,
-        status VARCHAR(50) DEFAULT 'draft',
-        reddit_post_id VARCHAR(255),
-        affiliate_link VARCHAR(255),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        upvotes INTEGER DEFAULT 0,
+        downvotes INTEGER DEFAULT 0,
+        comment_count INTEGER DEFAULT 0,
+        affiliate_link TEXT,
+        created_at TIMESTAMP DEFAULT NOW()
       );
 
       CREATE TABLE IF NOT EXISTS performance_metrics (
         id SERIAL PRIMARY KEY,
-        campaign_id INTEGER REFERENCES campaigns(id),
-        post_id INTEGER REFERENCES reddit_posts(id),
-        date DATE,
+        campaign_id INTEGER NOT NULL,
+        date TIMESTAMP NOT NULL,
         clicks INTEGER DEFAULT 0,
         impressions INTEGER DEFAULT 0,
         conversions INTEGER DEFAULT 0,
-        revenue DECIMAL DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        revenue DOUBLE PRECISION DEFAULT 0,
+        created_at TIMESTAMP DEFAULT NOW()
       );
 
       CREATE TABLE IF NOT EXISTS activities (
         id SERIAL PRIMARY KEY,
-        campaign_id INTEGER REFERENCES campaigns(id),
-        type VARCHAR(50),
-        message TEXT,
+        campaign_id INTEGER,
+        type TEXT NOT NULL,
+        message TEXT NOT NULL,
         details JSONB,
-        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        timestamp TIMESTAMP DEFAULT NOW()
       );
 
       CREATE TABLE IF NOT EXISTS content_templates (
         id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        content_type VARCHAR(50),
-        template_text TEXT,
-        target_keywords TEXT[],
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        title TEXT NOT NULL,
+        template TEXT NOT NULL,
+        content_type TEXT NOT NULL,
+        category TEXT,
+        tags TEXT[],
+        created_at TIMESTAMP DEFAULT NOW()
       );
 
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
-        username VARCHAR(255) NOT NULL UNIQUE,
-        email VARCHAR(255) NOT NULL UNIQUE,
-        password_hash VARCHAR(255) NOT NULL,
+        username TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        email TEXT UNIQUE,
+        api_usage_limit INTEGER DEFAULT 1000,
         api_usage_count INTEGER DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT NOW()
       );
     `);
     
