@@ -1,0 +1,141 @@
+ROLE: Senior Full-Stack Product Engineer
+TASK: Application State Review & MVP Feature Planning
+
+CONTEXT:
+
+Current project: Reddit Affiliate Scheduler
+Tech Stack: Node.js (Express, TypeScript), React (Vite), PostgreSQL (via pg)
+Key features:
+AI-powered content generation using OpenAI
+Reddit post scheduling system
+In-memory storage successfully migrated to PostgreSQL
+Hosting: Running on Replit, future migration to Hetzner or Coolify
+Dev tooling: ESLint, Prettier, Vitest in place; Prisma not yet implemented
+CI: GitHub integration established, but no workflows active yet
+REQUIRED ANALYSIS:
+
+Summarize your current understanding of the application’s structure and functionality
+Identify which features are fully implemented vs. partial or missing
+Propose the next 3–5 core MVP features to build for launch
+Suggest technical or architectural upgrades (e.g., retries, flair config, multi-user support)
+Recommend any cleanup or dev tooling improvements (e.g., tests, CI, docs)
+OUTPUT FORMAT:
+
+Product summary: What the app does and how it works (≤ 300 words)
+Feature completion status:
+Fully implemented
+In progress
+Missing
+Suggested next features (priority-ordered list with short justification)
+Technical enhancement recommendations (including DB, testing, or deployment)
+Optional: Rough sprint roadmap (1–2 weeks, organized by dev priority)
+CONSTRAINTS:
+
+Suggestions must be scoped realistically for a lean MVP
+Maintain Reddit API compliance and avoid overengineering
+Must assume deployment on low-cost infrastructure (Replit or Coolify)
+NOTE:
+You should use your current codebase awareness to answer, not guess. This will guide our development focus over the next 1–2 sprints.
+
+AK
+
+anders42
+Assistant
+3 minutes ago
+Based on the codebase analysis, here's a comprehensive review of the Reddit Affiliate Scheduler application:
+
+PRODUCT SUMMARY:
+The application is an AI-powered Reddit affiliate marketing automation platform built with Express/TypeScript backend and React/Vite frontend. It enables users to manage affiliate campaigns, generate AI-optimized content using OpenAI, schedule Reddit posts, and monitor performance metrics. The system uses PostgreSQL for data persistence and includes comprehensive schema definitions for affiliate programs, campaigns, posts, and metrics tracking.
+
+FEATURE COMPLETION STATUS:
+
+Fully Implemented:
+
+Database schema and storage layer (PostgreSQL integration)
+Basic Express API routes and endpoints
+Frontend UI components and layout
+Dark/light theme support
+GitHub sync automation
+In Progress:
+
+Reddit API integration (authentication setup exists)
+Post scheduling system (basic structure present)
+Content generation with OpenAI (endpoints defined)
+Campaign management UI
+Missing:
+
+Rate limiting implementation
+Error handling and retries
+User authentication/authorization
+Compliance monitoring system
+Analytics dashboard data integration
+NEXT CORE MVP FEATURES (Priority Order):
+
+Complete Reddit Authentication Flow
+Implement OAuth2 flow with Reddit API
+Add token refresh mechanism
+Store credentials securely in Replit Secrets
+Post Scheduler Core Logic
+Implement job queue for scheduled posts
+Add retry mechanism for failed posts
+Basic error reporting
+Content Generation & Compliance
+Complete OpenAI integration
+Add content validation against Reddit rules
+Basic sentiment analysis for safety
+Basic Analytics Dashboard
+Track post performance metrics
+Click-through monitoring
+Basic conversion tracking
+TECHNICAL RECOMMENDATIONS:
+
+Database Optimization
+Add database migrations
+Implement connection pooling
+Add basic caching layer
+Testing Infrastructure
+Add unit tests for core services
+Integration tests for Reddit API
+E2E tests for critical flows
+Error Handling
+Implement global error handler
+Add structured logging
+Setup basic monitoring
+Deployment Configuration
+Set deployment build command to
+and run command to
+This creates a comprehensive foundation while maintaining a lean MVP approach. Would you like me to focus on implementing any specific feature from this analysis?
+
+Save this analysis in your memory and devise an overall plan so that we can reach an end goal of a fully functional MVP solution that can schedule and post on Reddit.
+
+AK
+
+anders42
+Assistant
+just now
+Based on the codebase analysis and current state, I'll devise a plan to achieve a functional MVP. Here's the prioritized roadmap:
+
+Phase 1 - Core Infrastructure (Current Sprint)
+
+Fix the port conflict issue first:
+server/index.ts
+Setup deployment configuration:
+Set deployment build command to
+and run command to
+Phase 2 - Reddit Integration
+
+Complete Reddit OAuth flow
+Implement secure token storage
+Add rate limiting
+Set up error handling
+Phase 3 - Content Generation
+
+Finalize OpenAI integration
+Implement content validation
+Add compliance checking
+Phase 4 - Scheduling System
+
+Complete post scheduling logic
+Add retry mechanisms
+Implement job queue monitoring
+Would you like me to start implementing any specific phase? We should begin with Phase 1 to ensure the core infrastructure is stable before adding features.
