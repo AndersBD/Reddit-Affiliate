@@ -9,6 +9,8 @@ import {
   type User, type InsertUser
 } from "@shared/schema";
 
+import { query, toCamelCase, toSnakeCase, initializeDatabase } from "./db";
+
 export interface IStorage {
   // Affiliate Programs
   getAffiliatePrograms(): Promise<AffiliateProgram[]>;
@@ -790,4 +792,719 @@ export class MemStorage implements IStorage {
   }
 }
 
+export class FileStorage implements IStorage {
+  constructor() {
+    // Initialize database on startup
+    initializeDatabase().catch(error => {
+      console.error('Failed to initialize database:', error);
+    });
+  }
+
+  // Affiliate Programs
+  async getAffiliatePrograms(): Promise<AffiliateProgram[]> {
+    try {
+      const result = await query('SELECT * FROM affiliate_programs ORDER BY name');
+      return toCamelCase(result.rows);
+    } catch (error) {
+      console.error('Error fetching affiliate programs:', error);
+      return [];
+    }
+  }
+
+  async getAffiliateProgram(id: number): Promise<AffiliateProgram | undefined> {
+    try {
+      const result = await query('SELECT * FROM affiliate_programs WHERE id = $1', [id]);
+      if (result.rows.length === 0) return undefined;
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error(`Error fetching affiliate program with id ${id}:`, error);
+      return undefined;
+    }
+  }
+
+  async createAffiliateProgram(program: InsertAffiliateProgram): Promise<AffiliateProgram> {
+    try {
+      const values = toSnakeCase(program);
+      const keys = Object.keys(values);
+      const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+      const columns = keys.join(', ');
+      
+      const result = await query(
+        `INSERT INTO affiliate_programs (${columns}) 
+         VALUES (${placeholders}) 
+         RETURNING *`,
+        Object.values(values)
+      );
+      
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error('Error creating affiliate program:', error);
+      throw error;
+    }
+  }
+
+  async updateAffiliateProgram(id: number, program: Partial<InsertAffiliateProgram>): Promise<AffiliateProgram | undefined> {
+    try {
+      const values = toSnakeCase(program);
+      const updates = Object.keys(values)
+        .map((key, index) => `${key} = $${index + 1}`)
+        .join(', ');
+      
+      const result = await query(
+        `UPDATE affiliate_programs 
+         SET ${updates}
+         WHERE id = $${Object.keys(values).length + 1}
+         RETURNING *`,
+        [...Object.values(values), id]
+      );
+      
+      if (result.rows.length === 0) return undefined;
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error(`Error updating affiliate program with id ${id}:`, error);
+      return undefined;
+    }
+  }
+
+  async deleteAffiliateProgram(id: number): Promise<boolean> {
+    try {
+      const result = await query('DELETE FROM affiliate_programs WHERE id = $1', [id]);
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error(`Error deleting affiliate program with id ${id}:`, error);
+      return false;
+    }
+  }
+
+  // Subreddits
+  async getSubreddits(): Promise<Subreddit[]> {
+    try {
+      const result = await query('SELECT * FROM subreddits ORDER BY name');
+      return toCamelCase(result.rows);
+    } catch (error) {
+      console.error('Error fetching subreddits:', error);
+      return [];
+    }
+  }
+
+  async getSubreddit(id: number): Promise<Subreddit | undefined> {
+    try {
+      const result = await query('SELECT * FROM subreddits WHERE id = $1', [id]);
+      if (result.rows.length === 0) return undefined;
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error(`Error fetching subreddit with id ${id}:`, error);
+      return undefined;
+    }
+  }
+
+  async getSubredditByName(name: string): Promise<Subreddit | undefined> {
+    try {
+      const result = await query('SELECT * FROM subreddits WHERE name = $1', [name]);
+      if (result.rows.length === 0) return undefined;
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error(`Error fetching subreddit with name ${name}:`, error);
+      return undefined;
+    }
+  }
+
+  async createSubreddit(subreddit: InsertSubreddit): Promise<Subreddit> {
+    try {
+      const values = toSnakeCase(subreddit);
+      const keys = Object.keys(values);
+      const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+      const columns = keys.join(', ');
+      
+      const result = await query(
+        `INSERT INTO subreddits (${columns}) 
+         VALUES (${placeholders}) 
+         RETURNING *`,
+        Object.values(values)
+      );
+      
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error('Error creating subreddit:', error);
+      throw error;
+    }
+  }
+
+  async updateSubreddit(id: number, subreddit: Partial<InsertSubreddit>): Promise<Subreddit | undefined> {
+    try {
+      const values = toSnakeCase(subreddit);
+      const updates = Object.keys(values)
+        .map((key, index) => `${key} = $${index + 1}`)
+        .join(', ');
+      
+      const result = await query(
+        `UPDATE subreddits
+         SET ${updates}
+         WHERE id = $${Object.keys(values).length + 1}
+         RETURNING *`,
+        [...Object.values(values), id]
+      );
+      
+      if (result.rows.length === 0) return undefined;
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error(`Error updating subreddit with id ${id}:`, error);
+      return undefined;
+    }
+  }
+
+  // Campaigns
+  async getCampaigns(): Promise<Campaign[]> {
+    try {
+      const result = await query('SELECT * FROM campaigns ORDER BY name');
+      return toCamelCase(result.rows);
+    } catch (error) {
+      console.error('Error fetching campaigns:', error);
+      return [];
+    }
+  }
+
+  async getCampaign(id: number): Promise<Campaign | undefined> {
+    try {
+      const result = await query('SELECT * FROM campaigns WHERE id = $1', [id]);
+      if (result.rows.length === 0) return undefined;
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error(`Error fetching campaign with id ${id}:`, error);
+      return undefined;
+    }
+  }
+
+  async createCampaign(campaign: InsertCampaign): Promise<Campaign> {
+    try {
+      const values = toSnakeCase(campaign);
+      
+      // Handle schedule object
+      if (values.schedule) {
+        values.schedule = JSON.stringify(values.schedule);
+      }
+      
+      const keys = Object.keys(values);
+      const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+      const columns = keys.join(', ');
+      
+      const result = await query(
+        `INSERT INTO campaigns (${columns}) 
+         VALUES (${placeholders}) 
+         RETURNING *`,
+        Object.values(values)
+      );
+      
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error('Error creating campaign:', error);
+      throw error;
+    }
+  }
+
+  async updateCampaign(id: number, campaign: Partial<InsertCampaign>): Promise<Campaign | undefined> {
+    try {
+      const values = toSnakeCase(campaign);
+      
+      // Handle schedule object
+      if (values.schedule) {
+        values.schedule = JSON.stringify(values.schedule);
+      }
+      
+      const updates = Object.keys(values)
+        .map((key, index) => `${key} = $${index + 1}`)
+        .join(', ');
+      
+      const result = await query(
+        `UPDATE campaigns
+         SET ${updates}
+         WHERE id = $${Object.keys(values).length + 1}
+         RETURNING *`,
+        [...Object.values(values), id]
+      );
+      
+      if (result.rows.length === 0) return undefined;
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error(`Error updating campaign with id ${id}:`, error);
+      return undefined;
+    }
+  }
+
+  async deleteCampaign(id: number): Promise<boolean> {
+    try {
+      const result = await query('DELETE FROM campaigns WHERE id = $1', [id]);
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error(`Error deleting campaign with id ${id}:`, error);
+      return false;
+    }
+  }
+
+  async getActiveCampaignCount(): Promise<number> {
+    try {
+      const result = await query("SELECT COUNT(*) FROM campaigns WHERE status = 'active'");
+      return parseInt(result.rows[0].count, 10);
+    } catch (error) {
+      console.error('Error counting active campaigns:', error);
+      return 0;
+    }
+  }
+
+  // Reddit Posts
+  async getRedditPosts(): Promise<RedditPost[]> {
+    try {
+      const result = await query('SELECT * FROM reddit_posts ORDER BY created_at DESC');
+      return toCamelCase(result.rows);
+    } catch (error) {
+      console.error('Error fetching reddit posts:', error);
+      return [];
+    }
+  }
+
+  async getRedditPostsByCampaign(campaignId: number): Promise<RedditPost[]> {
+    try {
+      const result = await query(
+        'SELECT * FROM reddit_posts WHERE campaign_id = $1 ORDER BY created_at DESC',
+        [campaignId]
+      );
+      return toCamelCase(result.rows);
+    } catch (error) {
+      console.error(`Error fetching reddit posts for campaign ${campaignId}:`, error);
+      return [];
+    }
+  }
+
+  async getRedditPostsByStatus(status: string): Promise<RedditPost[]> {
+    try {
+      const result = await query(
+        'SELECT * FROM reddit_posts WHERE status = $1 ORDER BY created_at DESC',
+        [status]
+      );
+      return toCamelCase(result.rows);
+    } catch (error) {
+      console.error(`Error fetching reddit posts with status ${status}:`, error);
+      return [];
+    }
+  }
+
+  async getRedditPost(id: number): Promise<RedditPost | undefined> {
+    try {
+      const result = await query('SELECT * FROM reddit_posts WHERE id = $1', [id]);
+      if (result.rows.length === 0) return undefined;
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error(`Error fetching reddit post with id ${id}:`, error);
+      return undefined;
+    }
+  }
+
+  async createRedditPost(post: InsertRedditPost): Promise<RedditPost> {
+    try {
+      const values = toSnakeCase(post);
+      const keys = Object.keys(values);
+      const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+      const columns = keys.join(', ');
+      
+      const result = await query(
+        `INSERT INTO reddit_posts (${columns}) 
+         VALUES (${placeholders}) 
+         RETURNING *`,
+        Object.values(values)
+      );
+      
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error('Error creating reddit post:', error);
+      throw error;
+    }
+  }
+
+  async updateRedditPost(id: number, post: Partial<InsertRedditPost>): Promise<RedditPost | undefined> {
+    try {
+      const values = toSnakeCase(post);
+      const updates = Object.keys(values)
+        .map((key, index) => `${key} = $${index + 1}`)
+        .join(', ');
+      
+      const result = await query(
+        `UPDATE reddit_posts
+         SET ${updates}
+         WHERE id = $${Object.keys(values).length + 1}
+         RETURNING *`,
+        [...Object.values(values), id]
+      );
+      
+      if (result.rows.length === 0) return undefined;
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error(`Error updating reddit post with id ${id}:`, error);
+      return undefined;
+    }
+  }
+
+  async deleteRedditPost(id: number): Promise<boolean> {
+    try {
+      const result = await query('DELETE FROM reddit_posts WHERE id = $1', [id]);
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error(`Error deleting reddit post with id ${id}:`, error);
+      return false;
+    }
+  }
+
+  async getPendingScheduledPosts(): Promise<RedditPost[]> {
+    try {
+      const now = new Date();
+      const result = await query(
+        "SELECT * FROM reddit_posts WHERE status = 'scheduled' AND scheduled_time <= $1",
+        [now]
+      );
+      return toCamelCase(result.rows);
+    } catch (error) {
+      console.error('Error fetching pending scheduled posts:', error);
+      return [];
+    }
+  }
+
+  // Performance Metrics
+  async getMetricsByCampaign(campaignId: number): Promise<PerformanceMetric[]> {
+    try {
+      const result = await query(
+        'SELECT * FROM performance_metrics WHERE campaign_id = $1 ORDER BY date DESC',
+        [campaignId]
+      );
+      return toCamelCase(result.rows);
+    } catch (error) {
+      console.error(`Error fetching metrics for campaign ${campaignId}:`, error);
+      return [];
+    }
+  }
+
+  async getMetricsByDateRange(startDate: Date, endDate: Date): Promise<PerformanceMetric[]> {
+    try {
+      const result = await query(
+        'SELECT * FROM performance_metrics WHERE date BETWEEN $1 AND $2 ORDER BY date',
+        [startDate, endDate]
+      );
+      return toCamelCase(result.rows);
+    } catch (error) {
+      console.error(`Error fetching metrics between ${startDate} and ${endDate}:`, error);
+      return [];
+    }
+  }
+
+  async createMetric(metric: InsertPerformanceMetric): Promise<PerformanceMetric> {
+    try {
+      const values = toSnakeCase(metric);
+      const keys = Object.keys(values);
+      const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+      const columns = keys.join(', ');
+      
+      const result = await query(
+        `INSERT INTO performance_metrics (${columns}) 
+         VALUES (${placeholders}) 
+         RETURNING *`,
+        Object.values(values)
+      );
+      
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error('Error creating performance metric:', error);
+      throw error;
+    }
+  }
+
+  async updateMetric(id: number, metric: Partial<InsertPerformanceMetric>): Promise<PerformanceMetric | undefined> {
+    try {
+      const values = toSnakeCase(metric);
+      const updates = Object.keys(values)
+        .map((key, index) => `${key} = $${index + 1}`)
+        .join(', ');
+      
+      const result = await query(
+        `UPDATE performance_metrics
+         SET ${updates}
+         WHERE id = $${Object.keys(values).length + 1}
+         RETURNING *`,
+        [...Object.values(values), id]
+      );
+      
+      if (result.rows.length === 0) return undefined;
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error(`Error updating performance metric with id ${id}:`, error);
+      return undefined;
+    }
+  }
+
+  async getPerformanceSummary(): Promise<{ clicks: number, conversions: number, conversionRate: number, revenue: number }> {
+    try {
+      const result = await query(`
+        SELECT 
+          SUM(clicks) as total_clicks,
+          SUM(conversions) as total_conversions,
+          SUM(revenue) as total_revenue
+        FROM performance_metrics
+      `);
+      
+      if (result.rows.length === 0) {
+        return { clicks: 0, conversions: 0, conversionRate: 0, revenue: 0 };
+      }
+      
+      const totalClicks = parseInt(result.rows[0].total_clicks || '0', 10);
+      const totalConversions = parseInt(result.rows[0].total_conversions || '0', 10);
+      const totalRevenue = parseFloat(result.rows[0].total_revenue || '0');
+      const conversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
+      
+      return {
+        clicks: totalClicks,
+        conversions: totalConversions,
+        conversionRate,
+        revenue: totalRevenue,
+      };
+    } catch (error) {
+      console.error('Error fetching performance summary:', error);
+      return { clicks: 0, conversions: 0, conversionRate: 0, revenue: 0 };
+    }
+  }
+
+  async getTopSubreddits(limit: number = 5): Promise<{ subreddit: string, clicks: number }[]> {
+    try {
+      const result = await query(`
+        SELECT 
+          r.subreddit_name as subreddit, 
+          SUM(p.clicks) as total_clicks
+        FROM reddit_posts r
+        JOIN performance_metrics p ON r.id = p.post_id
+        WHERE r.status = 'posted'
+        GROUP BY r.subreddit_name
+        ORDER BY total_clicks DESC
+        LIMIT $1
+      `, [limit]);
+      
+      return result.rows.map(row => ({
+        subreddit: row.subreddit,
+        clicks: parseInt(row.total_clicks || '0', 10),
+      }));
+    } catch (error) {
+      console.error('Error fetching top subreddits:', error);
+      return [];
+    }
+  }
+
+  // Activities
+  async getActivities(limit: number = 10): Promise<Activity[]> {
+    try {
+      const result = await query(
+        'SELECT * FROM activities ORDER BY timestamp DESC LIMIT $1',
+        [limit]
+      );
+      return toCamelCase(result.rows);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      return [];
+    }
+  }
+
+  async getActivitiesByCampaign(campaignId: number, limit: number = 10): Promise<Activity[]> {
+    try {
+      const result = await query(
+        'SELECT * FROM activities WHERE campaign_id = $1 ORDER BY timestamp DESC LIMIT $2',
+        [campaignId, limit]
+      );
+      return toCamelCase(result.rows);
+    } catch (error) {
+      console.error(`Error fetching activities for campaign ${campaignId}:`, error);
+      return [];
+    }
+  }
+
+  async createActivity(activity: InsertActivity): Promise<Activity> {
+    try {
+      const values = toSnakeCase(activity);
+      
+      // Handle details object
+      if (values.details) {
+        values.details = JSON.stringify(values.details);
+      }
+      
+      const keys = Object.keys(values);
+      const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+      const columns = keys.join(', ');
+      
+      const result = await query(
+        `INSERT INTO activities (${columns}) 
+         VALUES (${placeholders}) 
+         RETURNING *`,
+        Object.values(values)
+      );
+      
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error('Error creating activity:', error);
+      throw error;
+    }
+  }
+
+  // Content Templates
+  async getContentTemplates(): Promise<ContentTemplate[]> {
+    try {
+      const result = await query('SELECT * FROM content_templates ORDER BY title');
+      return toCamelCase(result.rows);
+    } catch (error) {
+      console.error('Error fetching content templates:', error);
+      return [];
+    }
+  }
+
+  async getContentTemplatesByType(contentType: string): Promise<ContentTemplate[]> {
+    try {
+      const result = await query(
+        'SELECT * FROM content_templates WHERE content_type = $1 ORDER BY title',
+        [contentType]
+      );
+      return toCamelCase(result.rows);
+    } catch (error) {
+      console.error(`Error fetching content templates of type ${contentType}:`, error);
+      return [];
+    }
+  }
+
+  async getContentTemplate(id: number): Promise<ContentTemplate | undefined> {
+    try {
+      const result = await query('SELECT * FROM content_templates WHERE id = $1', [id]);
+      if (result.rows.length === 0) return undefined;
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error(`Error fetching content template with id ${id}:`, error);
+      return undefined;
+    }
+  }
+
+  async createContentTemplate(template: InsertContentTemplate): Promise<ContentTemplate> {
+    try {
+      const values = toSnakeCase(template);
+      const keys = Object.keys(values);
+      const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+      const columns = keys.join(', ');
+      
+      const result = await query(
+        `INSERT INTO content_templates (${columns}) 
+         VALUES (${placeholders}) 
+         RETURNING *`,
+        Object.values(values)
+      );
+      
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error('Error creating content template:', error);
+      throw error;
+    }
+  }
+
+  async updateContentTemplate(id: number, template: Partial<InsertContentTemplate>): Promise<ContentTemplate | undefined> {
+    try {
+      const values = toSnakeCase(template);
+      const updates = Object.keys(values)
+        .map((key, index) => `${key} = $${index + 1}`)
+        .join(', ');
+      
+      const result = await query(
+        `UPDATE content_templates
+         SET ${updates}
+         WHERE id = $${Object.keys(values).length + 1}
+         RETURNING *`,
+        [...Object.values(values), id]
+      );
+      
+      if (result.rows.length === 0) return undefined;
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error(`Error updating content template with id ${id}:`, error);
+      return undefined;
+    }
+  }
+
+  async deleteContentTemplate(id: number): Promise<boolean> {
+    try {
+      const result = await query('DELETE FROM content_templates WHERE id = $1', [id]);
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error(`Error deleting content template with id ${id}:`, error);
+      return false;
+    }
+  }
+
+  // Users
+  async getUser(id: number): Promise<User | undefined> {
+    try {
+      const result = await query('SELECT * FROM users WHERE id = $1', [id]);
+      if (result.rows.length === 0) return undefined;
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error(`Error fetching user with id ${id}:`, error);
+      return undefined;
+    }
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    try {
+      const result = await query('SELECT * FROM users WHERE username = $1', [username]);
+      if (result.rows.length === 0) return undefined;
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error(`Error fetching user with username ${username}:`, error);
+      return undefined;
+    }
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    try {
+      const values = toSnakeCase(user);
+      const keys = Object.keys(values);
+      const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+      const columns = keys.join(', ');
+      
+      const result = await query(
+        `INSERT INTO users (${columns}) 
+         VALUES (${placeholders}) 
+         RETURNING *`,
+        Object.values(values)
+      );
+      
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
+    }
+  }
+
+  async updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined> {
+    try {
+      const values = toSnakeCase(user);
+      const updates = Object.keys(values)
+        .map((key, index) => `${key} = $${index + 1}`)
+        .join(', ');
+      
+      const result = await query(
+        `UPDATE users
+         SET ${updates}
+         WHERE id = $${Object.keys(values).length + 1}
+         RETURNING *`,
+        [...Object.values(values), id]
+      );
+      
+      if (result.rows.length === 0) return undefined;
+      return toCamelCase(result.rows[0]);
+    } catch (error) {
+      console.error(`Error updating user with id ${id}:`, error);
+      return undefined;
+    }
+  }
+}
+
+// Use in-memory storage for now, with option to switch to PostgreSQL later
+// Uncomment the following line to use PostgreSQL instead
+// export const storage = new FileStorage();
 export const storage = new MemStorage();
