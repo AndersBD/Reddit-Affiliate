@@ -1504,7 +1504,5 @@ export class FileStorage implements IStorage {
   }
 }
 
-// Use in-memory storage for now, with option to switch to PostgreSQL later
-// Uncomment the following line to use PostgreSQL instead
-// export const storage = new FileStorage();
-export const storage = new MemStorage();
+// Switch to PostgreSQL for persistent storage
+export const storage = new FileStorage();
