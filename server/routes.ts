@@ -784,6 +784,279 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Keywords Routes
+  apiRouter.get("/keywords", async (req, res) => {
+    try {
+      const campaignId = req.query.campaignId ? parseInt(req.query.campaignId as string) : undefined;
+      const affiliateProgramId = req.query.affiliateProgramId ? parseInt(req.query.affiliateProgramId as string) : undefined;
+      
+      let keywords;
+      if (campaignId) {
+        keywords = await storage.getKeywordsByCampaign(campaignId);
+      } else if (affiliateProgramId) {
+        keywords = await storage.getKeywordsByAffiliateProgram(affiliateProgramId);
+      } else {
+        keywords = await storage.getKeywords();
+      }
+      
+      res.json(keywords);
+    } catch (error) {
+      console.error("Error fetching keywords:", error);
+      res.status(500).json({ message: "Error fetching keywords" });
+    }
+  });
+
+  apiRouter.get("/keywords/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const keyword = await storage.getKeyword(id);
+      
+      if (!keyword) {
+        return res.status(404).json({ message: "Keyword not found" });
+      }
+      
+      res.json(keyword);
+    } catch (error) {
+      console.error(`Error fetching keyword ${req.params.id}:`, error);
+      res.status(500).json({ message: "Error fetching keyword" });
+    }
+  });
+
+  apiRouter.post("/keywords", async (req, res) => {
+    try {
+      const validatedData = insertKeywordSchema.parse(req.body);
+      const keyword = await storage.createKeyword(validatedData);
+      
+      res.status(201).json(keyword);
+    } catch (error) {
+      console.error("Error creating keyword:", error);
+      res.status(400).json({ message: "Invalid keyword data" });
+    }
+  });
+
+  apiRouter.patch("/keywords/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertKeywordSchema.partial().parse(req.body);
+      
+      const updatedKeyword = await storage.updateKeyword(id, validatedData);
+      
+      if (!updatedKeyword) {
+        return res.status(404).json({ message: "Keyword not found" });
+      }
+      
+      res.json(updatedKeyword);
+    } catch (error) {
+      console.error(`Error updating keyword ${req.params.id}:`, error);
+      res.status(400).json({ message: "Invalid keyword data" });
+    }
+  });
+
+  apiRouter.delete("/keywords/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteKeyword(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Keyword not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error(`Error deleting keyword ${req.params.id}:`, error);
+      res.status(500).json({ message: "Error deleting keyword" });
+    }
+  });
+
+  // Opportunities Routes
+  apiRouter.get("/opportunities", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      
+      let opportunities;
+      if (status) {
+        opportunities = await storage.getRedditOpportunitiesByStatus(status);
+      } else {
+        opportunities = await storage.getRedditOpportunities();
+      }
+      
+      res.json(opportunities);
+    } catch (error) {
+      console.error("Error fetching opportunities:", error);
+      res.status(500).json({ message: "Error fetching opportunities" });
+    }
+  });
+
+  apiRouter.get("/opportunities/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const opportunity = await storage.getRedditOpportunity(id);
+      
+      if (!opportunity) {
+        return res.status(404).json({ message: "Opportunity not found" });
+      }
+      
+      res.json(opportunity);
+    } catch (error) {
+      console.error(`Error fetching opportunity ${req.params.id}:`, error);
+      res.status(500).json({ message: "Error fetching opportunity" });
+    }
+  });
+
+  apiRouter.patch("/opportunities/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertRedditOpportunitySchema.partial().parse(req.body);
+      
+      const updatedOpportunity = await storage.updateRedditOpportunity(id, validatedData);
+      
+      if (!updatedOpportunity) {
+        return res.status(404).json({ message: "Opportunity not found" });
+      }
+      
+      res.json(updatedOpportunity);
+    } catch (error) {
+      console.error(`Error updating opportunity ${req.params.id}:`, error);
+      res.status(400).json({ message: "Invalid opportunity data" });
+    }
+  });
+
+  apiRouter.post("/opportunities/scan", async (req, res) => {
+    try {
+      const keywordLimit = req.body.keywordLimit || 10;
+      
+      // Phase 1: Process keywords and find opportunities
+      const processedKeywords = await triggerKeywordScan(keywordLimit);
+      
+      // Phase 2: Score opportunities and queue them
+      const queuedCount = await triggerOpportunityScoring();
+      
+      // Log activity
+      await storage.createActivity({
+        type: "system",
+        message: `Opportunity scan completed: ${processedKeywords} keywords processed, ${queuedCount} opportunities queued`,
+        details: { processedKeywords, queuedCount }
+      });
+      
+      res.json({ 
+        success: true, 
+        processedKeywords, 
+        queuedCount 
+      });
+    } catch (error) {
+      console.error("Error scanning for opportunities:", error);
+      res.status(500).json({ message: "Error scanning for opportunities" });
+    }
+  });
+
+  apiRouter.post("/opportunities/process", async (req, res) => {
+    try {
+      // Process opportunities in the queue and generate content
+      await triggerOpportunityProcessing();
+      
+      // Log activity
+      await storage.createActivity({
+        type: "system",
+        message: "Opportunity processing triggered",
+        details: { timestamp: new Date() }
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error processing opportunities:", error);
+      res.status(500).json({ message: "Error processing opportunities" });
+    }
+  });
+
+  // Content Queue Routes
+  apiRouter.get("/content-queue", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const campaignId = req.query.campaignId ? parseInt(req.query.campaignId as string) : undefined;
+      
+      let queueItems;
+      if (status) {
+        queueItems = await storage.getContentQueueItemsByStatus(status);
+      } else if (campaignId) {
+        queueItems = await storage.getContentQueueItemsByCampaign(campaignId);
+      } else {
+        queueItems = await storage.getContentQueueItems();
+      }
+      
+      res.json(queueItems);
+    } catch (error) {
+      console.error("Error fetching content queue:", error);
+      res.status(500).json({ message: "Error fetching content queue" });
+    }
+  });
+
+  apiRouter.get("/content-queue/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const queueItem = await storage.getContentQueueItem(id);
+      
+      if (!queueItem) {
+        return res.status(404).json({ message: "Content queue item not found" });
+      }
+      
+      res.json(queueItem);
+    } catch (error) {
+      console.error(`Error fetching content queue item ${req.params.id}:`, error);
+      res.status(500).json({ message: "Error fetching content queue item" });
+    }
+  });
+
+  apiRouter.post("/content-queue", async (req, res) => {
+    try {
+      const validatedData = insertContentQueueSchema.parse(req.body);
+      const queueItem = await storage.createContentQueueItem(validatedData);
+      
+      res.status(201).json(queueItem);
+    } catch (error) {
+      console.error("Error creating content queue item:", error);
+      res.status(400).json({ message: "Invalid content queue data" });
+    }
+  });
+
+  apiRouter.patch("/content-queue/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertContentQueueSchema.partial().parse(req.body);
+      
+      const updatedQueueItem = await storage.updateContentQueueItem(id, validatedData);
+      
+      if (!updatedQueueItem) {
+        return res.status(404).json({ message: "Content queue item not found" });
+      }
+      
+      res.json(updatedQueueItem);
+    } catch (error) {
+      console.error(`Error updating content queue item ${req.params.id}:`, error);
+      res.status(400).json({ message: "Invalid content queue data" });
+    }
+  });
+
+  apiRouter.delete("/content-queue/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteContentQueueItem(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Content queue item not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error(`Error deleting content queue item ${req.params.id}:`, error);
+      res.status(500).json({ message: "Error deleting content queue item" });
+    }
+  });
+
+  // Initialize Opportunity Scheduler
+  initializeOpportunityScheduler().catch(err => {
+    console.error("Error initializing opportunity scheduler:", err);
+  });
+
   // Register the API router
   // Mount auth routes
   app.use(authRoutes);

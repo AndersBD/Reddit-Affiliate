@@ -767,11 +767,77 @@ const ContentLibrary = () => {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium">Content Opportunities</h3>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  toast({
+                    title: "Scanning for opportunities",
+                    description: "Scanning Reddit for potential affiliate marketing opportunities...",
+                  });
+                  
+                  // Call the API to trigger a scan
+                  fetch('/api/opportunities/scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keywordLimit: 10 })
+                  })
+                  .then(res => res.json())
+                  .then(data => {
+                    queryClient.invalidateQueries({ queryKey: ['/api/opportunities'] });
+                    queryClient.invalidateQueries({ queryKey: ['/api/keywords'] });
+                    
+                    toast({
+                      title: "Scan completed",
+                      description: `Processed ${data.processedKeywords} keywords and found ${data.queuedCount} new opportunities.`,
+                    });
+                  })
+                  .catch(err => {
+                    toast({
+                      title: "Scan failed",
+                      description: "Failed to scan for new opportunities. Please try again.",
+                      variant: "destructive",
+                    });
+                  });
+                }}
+              >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Scan for New
               </Button>
-              <Button size="sm">
+              <Button 
+                size="sm"
+                onClick={() => {
+                  // Show dialog to add keyword
+                  const keyword = window.prompt("Enter keyword to track:");
+                  if (keyword) {
+                    fetch('/api/keywords', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ 
+                        keyword: keyword,
+                        status: 'active',
+                        priority: 'medium',
+                        campaignId: selectedCampaign ? parseInt(selectedCampaign) : null
+                      })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                      queryClient.invalidateQueries({ queryKey: ['/api/keywords'] });
+                      toast({
+                        title: "Keyword added",
+                        description: `"${keyword}" has been added to your tracking list.`,
+                      });
+                    })
+                    .catch(err => {
+                      toast({
+                        title: "Failed to add keyword",
+                        description: "Could not add the keyword. Please try again.",
+                        variant: "destructive",
+                      });
+                    });
+                  }
+                }}
+              >
                 <PlusCircle className="h-4 w-4 mr-2" />
                 Add Keyword
               </Button>
