@@ -515,6 +515,91 @@ export class MemStorage implements IStorage {
       email: "admin@example.com",
       apiUsageLimit: 10000,
     });
+
+    // Add sample keywords
+    const keywords: InsertKeyword[] = [
+      {
+        keyword: "best gaming mouse",
+        campaignId: 1,
+        affiliateProgramId: 1,
+        status: "active",
+        priority: "high",
+        lastScannedAt: null,
+      },
+      {
+        keyword: "mechanical keyboard review",
+        campaignId: 1,
+        affiliateProgramId: 1,
+        status: "active",
+        priority: "medium",
+        lastScannedAt: null,
+      },
+      {
+        keyword: "gaming headset comparison",
+        campaignId: 1,
+        affiliateProgramId: 1,
+        status: "active",
+        priority: "low",
+        lastScannedAt: null,
+      }
+    ];
+
+    keywords.forEach(keyword => this.createKeyword(keyword));
+
+    // Add sample opportunities
+    const opportunities: InsertRedditOpportunity[] = [
+      {
+        keywordId: 1,
+        url: "https://www.reddit.com/r/gaming/comments/sample1",
+        title: "Looking for recommendations on gaming mice",
+        snippet: "I've been using the same mouse for 5 years and need a new one. Any recommendations?",
+        subreddit: "r/gaming",
+        rank: 1,
+        actionType: "comment",
+        status: "new",
+        opportunityScore: 85,
+      },
+      {
+        keywordId: 2,
+        url: "https://www.reddit.com/r/MechanicalKeyboards/comments/sample2",
+        title: "Best mechanical keyboards under $100?",
+        snippet: "Looking for a good mechanical keyboard that won't break the bank.",
+        subreddit: "r/MechanicalKeyboards",
+        rank: 3,
+        actionType: "post",
+        status: "queued",
+        opportunityScore: 72,
+      },
+      {
+        keywordId: 3,
+        url: "https://www.reddit.com/r/headphones/comments/sample3",
+        title: "Gaming headset vs. regular headphones for gaming",
+        snippet: "Is it worth buying a dedicated gaming headset or should I get regular headphones?",
+        subreddit: "r/headphones",
+        rank: 2,
+        actionType: "comment",
+        status: "completed",
+        opportunityScore: 65,
+      }
+    ];
+
+    opportunities.forEach(opportunity => this.createRedditOpportunity(opportunity));
+
+    // Add sample content queue items
+    const queueItems: InsertContentQueueItem[] = [
+      {
+        opportunityId: 2,
+        campaignId: 1,
+        type: "post",
+        status: "pending",
+        content: "# My Experience with Budget Mechanical Keyboards\n\nAfter trying several options under $100, here's my take...",
+        scheduledTime: new Date(Date.now() + 86400000), // Tomorrow
+        title: "Best Mechanical Keyboards under $100 - My Personal Review",
+        subreddit: "r/MechanicalKeyboards",
+      }
+    ];
+
+    queueItems.forEach(item => this.createContentQueueItem(item));
   }
 
   // Affiliate Programs methods
