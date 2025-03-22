@@ -11,6 +11,344 @@ export function createOpenAIClient() {
 // Use a singleton instance for normal operation
 const openai = createOpenAIClient();
 
+// Autonomous Content Agent interface to define structured data for the pipeline
+export interface ContentResearchResult {
+  keyword: string;
+  subreddit: string;
+  relatedPosts: Array<{
+    title: string;
+    url: string;
+    upvotes: number;
+    age: string;
+    rank: number;
+  }>;
+  targetPost: {
+    title: string;
+    url: string;
+    content: string;
+    topComments: string[];
+  };
+  keywords: string[];
+  sentimentAnalysis: {
+    positive: number;
+    negative: number;
+    neutral: number;
+    mainConcerns: string[];
+    mainBenefits: string[];
+  };
+  opportunityScore: number;
+}
+
+export interface CommentEngagementResult {
+  originalPostUrl: string;
+  commentText: string;
+  affiliateLink?: string;
+  promoCode?: string;
+  expectedEngagement: {
+    upvotePotential: number;
+    clickPotential: number;
+    conversionPotential: number;
+  };
+}
+
+export interface OutrankingPostResult {
+  title: string;
+  content: string;
+  targetSubreddit: string;
+  affiliateLink?: string;
+  promoCode?: string;
+  tags: string[];
+  expectedPerformance: {
+    rankPotential: number;
+    clickPotential: number;
+    conversionPotential: number;
+  };
+  additionalNotes: string;
+}
+
+export interface KeywordLoopResult {
+  processedKeywords: string[];
+  recommendedNextKeywords: string[];
+  performanceInsights: Record<string, {
+    engagementRate: number;
+    conversionRate: number;
+    revenue: number;
+  }>;
+}
+
+// Main autonomous content pipeline interface
+export interface ContentPipeline {
+  research: (keyword: string, productName: string) => Promise<ContentResearchResult>;
+  comment: (research: ContentResearchResult, affiliateInfo: any) => Promise<CommentEngagementResult>;
+  createPost: (research: ContentResearchResult, affiliateInfo: any) => Promise<OutrankingPostResult>;
+  loopKeywords: (completedKeywords: string[], productCategory: string) => Promise<KeywordLoopResult>;
+}
+
+// Autonomous Content Pipeline Implementation
+export class AutonomousContentAgent implements ContentPipeline {
+  
+  // Phase 1: Research & Discovery
+  async research(keyword: string, productName: string): Promise<ContentResearchResult> {
+    try {
+      // Simulate search results gathering
+      const searchQuery = `${keyword} ${productName} site:reddit.com`;
+      console.log(`Researching: ${searchQuery}`);
+      
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are an expert at Reddit content research and SEO analysis.
+            
+Your task is to simulate the results of researching "${keyword}" related to "${productName}" on Reddit.
+
+You need to create a detailed research report that includes:
+1. Highly relevant subreddits where this topic is discussed
+2. Simulated Reddit posts that would rank for this keyword
+3. Example post content and comments
+4. Keyword opportunities and sentiment analysis
+5. An opportunity score (1-10) based on competition level and conversion potential
+
+Respond with JSON in the exact format defined below (important!):
+{
+  "keyword": "exact keyword researched",
+  "subreddit": "most relevant subreddit",
+  "relatedPosts": [
+    {
+      "title": "example post title",
+      "url": "reddit.com/r/subreddit/comments/example",
+      "upvotes": number,
+      "age": "3 months ago",
+      "rank": 1
+    },
+    ...more posts
+  ],
+  "targetPost": {
+    "title": "best matching post title",
+    "url": "reddit.com/r/subreddit/comments/example",
+    "content": "full post content example",
+    "topComments": ["comment 1", "comment 2"]
+  },
+  "keywords": ["related keyword 1", "related keyword 2"],
+  "sentimentAnalysis": {
+    "positive": 0.6,
+    "negative": 0.2,
+    "neutral": 0.2,
+    "mainConcerns": ["concern 1", "concern 2"],
+    "mainBenefits": ["benefit 1", "benefit 2"]
+  },
+  "opportunityScore": 7
+}
+
+Make the results realistic but optimized for an affiliate marketing opportunity.`
+          },
+          {
+            role: "user",
+            content: `Research the keyword "${keyword}" for the product "${productName}". Identify Reddit posts, sentiment, and opportunity score.`
+          }
+        ],
+        response_format: { type: "json_object" }
+      });
+      
+      const responseContent = response.choices[0].message.content || '';
+      return JSON.parse(responseContent);
+    } catch (error) {
+      console.error("Research phase failed:", error);
+      throw new Error("Failed to complete research phase");
+    }
+  }
+  
+  // Phase 2: Comment & Inject
+  async comment(research: ContentResearchResult, affiliateInfo: any): Promise<CommentEngagementResult> {
+    try {
+      const { targetPost, subreddit, sentimentAnalysis } = research;
+      const { affiliateLink, promoCode, productName, productDescription } = affiliateInfo;
+      
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are an expert at creating authentic, non-promotional Reddit comments that naturally include affiliate information.
+
+Your task is to create a comment for a Reddit post about ${productName} that will:
+1. Sound like a genuine Reddit user sharing experience
+2. Address key points/questions in the original post
+3. Naturally mention your experience with the product
+4. Include affiliate information in a non-promotional way
+5. Use casual, conversational language typical of Reddit
+
+Based on sentiment analysis, address these main concerns: ${sentimentAnalysis.mainConcerns.join(", ")}
+Highlight these benefits naturally: ${sentimentAnalysis.mainBenefits.join(", ")}
+
+Respond with JSON in this format:
+{
+  "originalPostUrl": "post URL",
+  "commentText": "your natural-sounding comment with affiliate info embedded",
+  "affiliateLink": "embedded link (if applicable)",
+  "promoCode": "mentioned promo code (if applicable)",
+  "expectedEngagement": {
+    "upvotePotential": number from 1-10,
+    "clickPotential": number from 1-10,
+    "conversionPotential": number from 1-10
+  }
+}`
+          },
+          {
+            role: "user",
+            content: `Create a Reddit comment for this post:
+
+Title: "${targetPost.title}"
+Content: "${targetPost.content}"
+
+Some top comments:
+${targetPost.topComments.map(comment => `- "${comment}"`).join('\n')}
+
+Subreddit: r/${subreddit}
+
+Please include this affiliate link subtly: ${affiliateLink}
+Promo code to mention naturally (if appropriate): ${promoCode}
+
+The comment should feel helpful and authentic, not promotional.`
+          }
+        ],
+        response_format: { type: "json_object" }
+      });
+      
+      const responseContent = response.choices[0].message.content || '';
+      return JSON.parse(responseContent);
+    } catch (error) {
+      console.error("Comment phase failed:", error);
+      throw new Error("Failed to generate engagement comment");
+    }
+  }
+  
+  // Phase 3: Outranking Post Creation
+  async createPost(research: ContentResearchResult, affiliateInfo: any): Promise<OutrankingPostResult> {
+    try {
+      const { keyword, subreddit, relatedPosts, sentimentAnalysis } = research;
+      const { affiliateLink, promoCode, productName, productDescription } = affiliateInfo;
+      
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are an expert at creating high-ranking Reddit posts that naturally include affiliate information without being promotional.
+
+Your task is to create a Reddit post about ${productName} that will:
+1. Outrank existing posts for the keyword "${keyword}"
+2. Provide genuine value and insight to r/${subreddit} members
+3. Include personal experience with the product
+4. Naturally include affiliate information without sounding promotional
+5. Address common questions and concerns
+
+Based on sentiment analysis, address these main concerns: ${sentimentAnalysis.mainConcerns.join(", ")}
+Highlight these benefits naturally: ${sentimentAnalysis.mainBenefits.join(", ")}
+
+The post should follow one of these high-performing formats:
+- Personal review with unexpected insights
+- Comparison with alternatives
+- "What I wish I knew before buying"
+- Unique use cases or tips
+
+Respond with JSON in this format:
+{
+  "title": "engaging post title optimized for the keyword",
+  "content": "full post content with affiliate info naturally embedded",
+  "targetSubreddit": "subreddit name",
+  "affiliateLink": "how the link is embedded",
+  "promoCode": "how the promo code is mentioned (if applicable)",
+  "tags": ["relevant", "post", "tags"],
+  "expectedPerformance": {
+    "rankPotential": number from 1-10,
+    "clickPotential": number from 1-10, 
+    "conversionPotential": number from 1-10
+  },
+  "additionalNotes": "any special considerations"
+}`
+          },
+          {
+            role: "user",
+            content: `Create a Reddit post that can outrank these existing posts:
+
+${relatedPosts.slice(0, 3).map(post => `- "${post.title}" (${post.upvotes} upvotes)`).join('\n')}
+
+Target keyword: "${keyword}"
+Target subreddit: r/${subreddit}
+Product: ${productName}
+Product description: ${productDescription}
+
+Please include this affiliate link naturally: ${affiliateLink}
+Promo code to mention (if appropriate): ${promoCode}
+
+The post should feel authentic and provide real value, not like marketing.`
+          }
+        ],
+        response_format: { type: "json_object" }
+      });
+      
+      const responseContent = response.choices[0].message.content || '';
+      return JSON.parse(responseContent);
+    } catch (error) {
+      console.error("Post creation phase failed:", error);
+      throw new Error("Failed to generate outranking post");
+    }
+  }
+  
+  // Phase 4: Keyword/Niche Looping
+  async loopKeywords(completedKeywords: string[], productCategory: string): Promise<KeywordLoopResult> {
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are an expert at affiliate keyword research and content planning.
+
+Your task is to analyze previously used keywords and suggest the next best keywords to target for a ${productCategory} product.
+
+Respond with JSON in this format:
+{
+  "processedKeywords": ["keyword1", "keyword2"],
+  "recommendedNextKeywords": ["new keyword 1", "new keyword 2", "new keyword 3", "new keyword 4", "new keyword 5"],
+  "performanceInsights": {
+    "keyword1": {
+      "engagementRate": 7.2,
+      "conversionRate": 3.1,
+      "revenue": 105
+    },
+    "keyword2": {
+      "engagementRate": 5.8,
+      "conversionRate": 2.4,
+      "revenue": 89
+    }
+  }
+}`
+          },
+          {
+            role: "user",
+            content: `We've already created content for these keywords:
+${completedKeywords.join(', ')}
+
+Based on these completed keywords, suggest the next 5 best keywords to target for a ${productCategory} product. 
+
+Also, provide simulated performance data for the previously used keywords to help guide our strategy.`
+          }
+        ],
+        response_format: { type: "json_object" }
+      });
+      
+      const responseContent = response.choices[0].message.content || '';
+      return JSON.parse(responseContent);
+    } catch (error) {
+      console.error("Keyword loop phase failed:", error);
+      throw new Error("Failed to generate keyword recommendations");
+    }
+  }
+}
+
 // Generate Reddit post content based on campaign, template, and subreddit
 export async function generateRedditPost(
   campaignName: string,

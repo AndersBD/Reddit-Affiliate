@@ -1,7 +1,15 @@
 import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateRedditPost, generateCommentResponse, checkContentCompliance, analyzeTrendingTopics, generateAffiliateLinkDescription } from "./services/openai";
+import { 
+  generateRedditPost, 
+  generateCommentResponse, 
+  checkContentCompliance, 
+  analyzeTrendingTopics, 
+  generateAffiliateLinkDescription,
+  AutonomousContentAgent,
+  ContentPipeline
+} from "./services/openai";
 import { createRedditPost, postComment, getSubredditPosts, getPostComments, getSubredditInfo, updatePostStats, getApiUsageStatus, analyzeBestPostingTime } from "./services/reddit";
 import { schedulePost, cancelScheduledPost, reschedulePost, getScheduledPosts, schedulePostsForCampaign, initializeScheduler } from "./services/scheduler";
 import { z } from "zod";
