@@ -95,6 +95,10 @@ const ContentLibrary = () => {
   const { data: opportunities, isLoading: opportunitiesLoading } = useQuery({
     queryKey: ['/api/opportunities'],
   });
+  
+  const { data: contentQueue, isLoading: contentQueueLoading } = useQuery({
+    queryKey: ['/api/content-queue'],
+  });
 
   // Load post data if we're on the edit route
   const { data: postData, isLoading: postLoading } = useQuery({
@@ -209,6 +213,100 @@ const ContentLibrary = () => {
       toast({
         title: "Compliance Check Failed",
         description: "Could not check compliance. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Keywords mutations
+  const createKeywordMutation = useMutation({
+    mutationFn: createKeyword,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/keywords'] });
+      setNewKeyword("");
+      toast({
+        title: "Keyword Added",
+        description: "The keyword has been added successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to Add Keyword",
+        description: "Could not add the keyword. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+  
+  const deleteKeywordMutation = useMutation({
+    mutationFn: deleteKeyword,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/keywords'] });
+      toast({
+        title: "Keyword Deleted",
+        description: "The keyword has been deleted successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to Delete Keyword",
+        description: "Could not delete the keyword. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Opportunity mutations
+  const updateOpportunityMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number, data: any }) => updateOpportunity(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/opportunities'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/content-queue'] });
+      toast({
+        title: "Opportunity Updated",
+        description: "The opportunity has been processed successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to Process Opportunity",
+        description: "Could not process the opportunity. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+  
+  const triggerOpportunityScanMutation = useMutation({
+    mutationFn: triggerOpportunityScan,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/opportunities'] });
+      toast({
+        title: "Scan Initiated",
+        description: "Opportunity scan has been initiated. New opportunities will appear shortly.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Scan Failed",
+        description: "Could not initiate opportunity scan. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+  
+  const createQueueItemMutation = useMutation({
+    mutationFn: createContentQueueItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/content-queue'] });
+      toast({
+        title: "Added to Queue",
+        description: "The item has been added to the content queue.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to Add to Queue",
+        description: "Could not add to content queue. Please try again.",
         variant: "destructive",
       });
     }
