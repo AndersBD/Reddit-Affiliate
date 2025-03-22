@@ -6,6 +6,7 @@ import { createRedditPost, postComment, getSubredditPosts, getPostComments, getS
 import { schedulePost, cancelScheduledPost, reschedulePost, getScheduledPosts, schedulePostsForCampaign, initializeScheduler } from "./services/scheduler";
 import { z } from "zod";
 import { insertAffiliateProgramSchema, insertCampaignSchema, insertRedditPostSchema, insertSubredditSchema, insertContentTemplateSchema } from "@shared/schema";
+import authRoutes from "./routes/index";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize the scheduler
@@ -606,6 +607,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Register the API router
+  // Mount auth routes
+  app.use(authRoutes);
+  
+  // Mount other API routes
   app.use("/api", apiRouter);
 
   const httpServer = createServer(app);

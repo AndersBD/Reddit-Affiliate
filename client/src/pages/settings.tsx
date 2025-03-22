@@ -43,7 +43,7 @@ import {
   CreditCard,
   KeyRound
 } from "lucide-react";
-import RedditAuth from "@/components/settings/RedditAuth";
+import { RedditAuth } from "@/components/settings/RedditAuth";
 
 // Schema for API settings
 const apiSettingsSchema = z.object({
@@ -409,7 +409,15 @@ const Settings = () => {
                       </div>
                     </div>
 
-                    <h3 className="text-lg font-medium">Reddit API Credentials</h3>
+                    <h3 className="text-lg font-medium">Reddit API Integration</h3>
+                    <div className="mb-6">
+                      <RedditAuth />
+                    </div>
+                    
+                    <h3 className="text-lg font-medium mt-8">Legacy Reddit API Credentials</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      These are only needed if you're not using OAuth authentication above.
+                    </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField
                         control={apiSettingsForm.control}
