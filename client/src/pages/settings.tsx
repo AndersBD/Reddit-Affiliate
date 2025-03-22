@@ -43,6 +43,7 @@ import {
   CreditCard,
   KeyRound
 } from "lucide-react";
+import RedditAuth from "@/components/settings/RedditAuth";
 
 // Schema for API settings
 const apiSettingsSchema = z.object({
