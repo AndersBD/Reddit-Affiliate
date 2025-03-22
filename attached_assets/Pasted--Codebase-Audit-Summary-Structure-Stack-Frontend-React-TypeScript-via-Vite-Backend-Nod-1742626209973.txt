@@ -1,0 +1,78 @@
+🔍 Codebase Audit Summary
+🗂 Structure & Stack
+Frontend: React + TypeScript (via Vite)
+
+Backend: Node.js + Express + TypeScript
+
+Scheduling: Custom in-memory job runner for Reddit posts
+
+AI: OpenAI integration via SDK
+
+Testing: Vitest + React Testing Library (partially implemented)
+
+Data: In-memory store (no persistent DB yet)
+
+CI/CD: GitHub Actions not yet configured (but ready)
+
+Reddit API: Integrated via snoowrap or custom API layer
+
+🚧 MVP Feature Coverage (as of now)
+Feature	Status	Notes
+Reddit OAuth + API posting	✅ Working	Posts are being scheduled and published successfully
+AI Content generation (OpenAI)	✅ Working	Prompt templating and content generation exist
+Post Queue & Scheduler	✅ Basic	In-memory only — works, but not persistent
+Frontend Dashboard (Post creation/status)	✅ Partial	UI is in place, but not fully styled or robust
+Flair/Tag selection	❌ Missing	Needed for subreddit-specific posting
+Subreddit-specific rule validation	❌ Missing	To prevent rejected posts or bans
+Persistent storage (DB or local JSON)	❌ Missing	Queue resets on restart — MVP blocker for reliability
+Error tracking / logging	❌ Missing	No sentry/logging hooks yet for failsafe ops
+Auth / Multi-user handling	❌ Out of Scope	Only needed if SaaS-ing it
+🚀 Recommended MVP Roadmap
+✅ Sprint 1 – MVP Completion (~3 days)
+ Replace in-memory queue with persistent storage (JSON or SQLite)
+
+ Add flair selection support (UI + API call)
+
+ Add minimal subreddit rule checker (hardcoded rules per subreddit)
+
+ Basic error handling + logging (console.error at minimum)
+
+ Polish UI: preview post format, copy markdown
+
+✅ Sprint 2 – Polish + Launch (~3–5 days)
+ Add GitHub Actions CI (lint + test)
+
+ Auto-format code (Prettier + ESLint)
+
+ Finalize Vitest coverage for:
+
+ Scheduler
+
+ AI generator
+
+ Post submit logic
+
+ Deploy MVP to Replit or small VPS
+
+ Create “Reset Scheduler” / Admin control UI
+
+🛠 Suggestions for Shipping Faster
+Temporary shortcuts to unblock dev:
+✅ Store queued posts in a local posts.json
+
+✅ Use a subredditConfig.ts file to define flairs/rules per subreddit
+
+✅ Use setInterval() for scheduler if Replit doesn’t run long-lived processes reliably
+
+📦 Next Deliverables I Can Provide:
+✅ posts.json storage module
+
+✅ Example flair config system
+
+✅ Minimal GitHub Action for lint/test
+
+✅ Updated test files for scheduler & OpenAI
+
+Would you like me to start creating those files now and drop them into your Replit environment or repo directly?
+
+Also: Want this full audit saved back into the "Founder Strategy Guide" canvas?
