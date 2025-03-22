@@ -44,7 +44,12 @@ import {
   generateContent, 
   createRedditPost, 
   updateRedditPost, 
-  checkContentCompliance, 
+  checkContentCompliance,
+  createKeyword,
+  deleteKeyword,
+  updateOpportunity,
+  triggerOpportunityScan,
+  createContentQueueItem, 
   schedulePost 
 } from "@/lib/api";
 
@@ -61,6 +66,11 @@ const ContentLibrary = () => {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isChecking, setIsChecking] = useState<boolean>(false);
   const [opportunitiesTabsValue, setOpportunitiesTabsValue] = useState<string>("all");
+  
+  // Additional state for opportunities tab
+  const [newKeyword, setNewKeyword] = useState<string>("");
+  const [isAddingKeyword, setIsAddingKeyword] = useState<boolean>(false);
+  const [isScanning, setIsScanning] = useState<boolean>(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -422,6 +432,77 @@ const ContentLibrary = () => {
     setTitle("");
     setContent("");
     setComplianceResult(null);
+  };
+  
+  // ========== Keyword & Opportunity Handlers ==========
+  
+  // Add a new keyword
+  const handleAddKeyword = () => {
+    if (!newKeyword.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter a keyword to add.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsAddingKeyword(true);
+    createKeywordMutation.mutate({
+      keyword: newKeyword.trim(),
+      status: "active",
+      campaignId: selectedCampaign ? parseInt(selectedCampaign) : null,
+    }, {
+      onSettled: () => {
+        setIsAddingKeyword(false);
+      }
+    });
+  };
+  
+  // Delete keyword
+  const handleDeleteKeyword = (id: number) => {
+    deleteKeywordMutation.mutate(id);
+  };
+  
+  // Process opportunity
+  const handleProcessOpportunity = (opportunity: any) => {
+    updateOpportunityMutation.mutate({
+      id: opportunity.id,
+      data: {
+        status: "queued"
+      }
+    });
+    
+    // Add to content queue
+    createQueueItemMutation.mutate({
+      opportunityId: opportunity.id,
+      content: "",
+      type: opportunity.actionType || "comment",
+      subreddit: opportunity.subreddit,
+      scheduledFor: new Date(Date.now() + 24 * 60 * 60 * 1000), // Schedule for tomorrow
+      status: "pending",
+      campaignId: selectedCampaign ? parseInt(selectedCampaign) : null,
+    });
+  };
+  
+  // Ignore opportunity
+  const handleIgnoreOpportunity = (opportunityId: number) => {
+    updateOpportunityMutation.mutate({
+      id: opportunityId,
+      data: {
+        status: "ignored"
+      }
+    });
+  };
+  
+  // Trigger opportunity scan
+  const handleTriggerScan = () => {
+    setIsScanning(true);
+    triggerOpportunityScanMutation.mutate(null, {
+      onSettled: () => {
+        setIsScanning(false);
+      }
+    });
   };
 
   return (
