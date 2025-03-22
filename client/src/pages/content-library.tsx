@@ -60,6 +60,7 @@ const ContentLibrary = () => {
   const [complianceResult, setComplianceResult] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isChecking, setIsChecking] = useState<boolean>(false);
+  const [opportunitiesTabsValue, setOpportunitiesTabsValue] = useState<string>("all");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -844,13 +845,33 @@ const ContentLibrary = () => {
             </div>
           </div>
           
-          <Tabs defaultValue="all" className="mb-6">
+          <Tabs defaultValue="all" className="mb-6" value={opportunitiesTabsValue} onValueChange={setOpportunitiesTabsValue}>
             <TabsList>
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="new">New</TabsTrigger>
               <TabsTrigger value="queued">Queued</TabsTrigger>
               <TabsTrigger value="completed">Completed</TabsTrigger>
             </TabsList>
+            
+            <div className="mt-2">
+              {(() => {
+                // Filter opportunities based on tab selection
+                const filteredOpportunities = (() => {
+                  if (opportunitiesTabsValue === "all") {
+                    return opportunities;
+                  } else {
+                    return opportunities?.filter((opp: any) => opp.status === opportunitiesTabsValue);
+                  }
+                })();
+                
+                // Show count of filtered opportunities
+                return (
+                  <p className="text-sm text-gray-500">
+                    Showing {filteredOpportunities?.length || 0} {opportunitiesTabsValue !== "all" ? opportunitiesTabsValue : ""} opportunities
+                  </p>
+                );
+              })()}
+            </div>
           </Tabs>
           
           <div className="space-y-4">
@@ -881,8 +902,12 @@ const ContentLibrary = () => {
                 </Card>
               ))
             ) : opportunities?.length > 0 ? (
-              // Opportunity cards
-              opportunities.map((opportunity: any) => (
+              // Opportunity cards - Filter based on selected tab
+              opportunities
+                .filter((opportunity: any) => 
+                  opportunitiesTabsValue === "all" || opportunity.status === opportunitiesTabsValue
+                )
+                .map((opportunity: any) => (
                 <Card key={opportunity.id} className={opportunity.status === 'new' ? 'border-l-4 border-l-blue-500' : ''}>
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-center">
@@ -934,8 +959,65 @@ const ContentLibrary = () => {
                         <ArrowUpRight className="h-3 w-3 ml-1" />
                       </a>
                     </Button>
-                    <Button size="sm">
-                      Generate Content
+                    <Button 
+                      size="sm"
+                      onClick={() => {
+                        if (opportunity.status === 'new') {
+                          toast({
+                            title: "Processing opportunity",
+                            description: "Generating content for this opportunity...",
+                          });
+                          
+                          // Update the opportunity status
+                          fetch(`/api/opportunities/${opportunity.id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                              status: 'processing' 
+                            })
+                          })
+                          .then(res => res.json())
+                          .then(() => {
+                            // Trigger content generation for this specific opportunity
+                            return fetch('/api/opportunities/process', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                            });
+                          })
+                          .then(res => res.json())
+                          .then(data => {
+                            queryClient.invalidateQueries({ queryKey: ['/api/opportunities'] });
+                            queryClient.invalidateQueries({ queryKey: ['/api/content-queue'] });
+                            
+                            toast({
+                              title: "Content generated",
+                              description: "Content has been generated and added to your queue.",
+                            });
+                          })
+                          .catch(err => {
+                            toast({
+                              title: "Generation failed",
+                              description: "Failed to generate content. Please try again.",
+                              variant: "destructive",
+                            });
+                          });
+                        } else if (opportunity.status === 'queued') {
+                          // View in queue
+                          toast({
+                            title: "Content queued",
+                            description: "This opportunity is already in your content queue.",
+                          });
+                        } else if (opportunity.status === 'completed') {
+                          toast({
+                            title: "Already processed",
+                            description: "Content has already been generated for this opportunity.",
+                          });
+                        }
+                      }}
+                    >
+                      {opportunity.status === 'new' ? 'Generate Content' : 
+                       opportunity.status === 'queued' ? 'View in Queue' : 
+                       opportunity.status === 'processing' ? 'Processing...' : 'View Content'}
                     </Button>
                   </CardFooter>
                 </Card>
@@ -950,11 +1032,75 @@ const ContentLibrary = () => {
                   We haven't discovered any content opportunities yet. Try adding keywords related to your products or starting a scan.
                 </p>
                 <div className="flex justify-center space-x-4">
-                  <Button variant="outline">
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      // Show dialog to add keyword
+                      const keyword = window.prompt("Enter keyword to track:");
+                      if (keyword) {
+                        fetch('/api/keywords', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ 
+                            keyword: keyword,
+                            status: 'active',
+                            priority: 'medium',
+                            campaignId: selectedCampaign ? parseInt(selectedCampaign) : null
+                          })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                          queryClient.invalidateQueries({ queryKey: ['/api/keywords'] });
+                          toast({
+                            title: "Keyword added",
+                            description: `"${keyword}" has been added to your tracking list.`,
+                          });
+                        })
+                        .catch(err => {
+                          toast({
+                            title: "Failed to add keyword",
+                            description: "Could not add the keyword. Please try again.",
+                            variant: "destructive",
+                          });
+                        });
+                      }
+                    }}
+                  >
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Add Keywords
                   </Button>
-                  <Button>
+                  <Button
+                    onClick={() => {
+                      toast({
+                        title: "Scanning for opportunities",
+                        description: "Scanning Reddit for potential affiliate marketing opportunities...",
+                      });
+                      
+                      // Call the API to trigger a scan
+                      fetch('/api/opportunities/scan', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ keywordLimit: 10 })
+                      })
+                      .then(res => res.json())
+                      .then(data => {
+                        queryClient.invalidateQueries({ queryKey: ['/api/opportunities'] });
+                        queryClient.invalidateQueries({ queryKey: ['/api/keywords'] });
+                        
+                        toast({
+                          title: "Scan completed",
+                          description: `Processed ${data.processedKeywords} keywords and found ${data.queuedCount} new opportunities.`,
+                        });
+                      })
+                      .catch(err => {
+                        toast({
+                          title: "Scan failed",
+                          description: "Failed to scan for new opportunities. Please try again.",
+                          variant: "destructive",
+                        });
+                      });
+                    }}
+                  >
                     <RefreshCw className="mr-2 h-4 w-4" />
                     Start Scan
                   </Button>
