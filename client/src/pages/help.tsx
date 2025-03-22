@@ -3,6 +3,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { buttonVariants } from "@/components/ui/button";
 import { HelpCircle, Mail, MessageSquare, FileText, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
+import PageWrapper from "@/components/layout/PageWrapper";
 
 export default function Help() {
   const faqs = [
@@ -50,11 +51,10 @@ export default function Help() {
   ];
 
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Help & Support</h1>
-      </div>
-
+    <PageWrapper
+      title="Help & Support"
+      description="Find answers and get assistance with your marketing automation"
+    >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
         <Card className="lg:col-span-2">
           <CardHeader>
@@ -146,6 +146,6 @@ export default function Help() {
           ))}
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }
