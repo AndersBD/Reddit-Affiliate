@@ -9,6 +9,10 @@ import ContentLibrary from "@/pages/content-library";
 import Scheduling from "@/pages/scheduling";
 import Analytics from "@/pages/analytics";
 import AffiliatePrograms from "@/pages/affiliate-programs";
+import AffiliateLinks from "@/pages/affiliate-links";
+import Commissions from "@/pages/commissions";
+import Audience from "@/pages/audience";
+import Help from "@/pages/help";
 import Settings from "@/pages/settings";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
@@ -18,12 +22,25 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/dashboard" component={Dashboard} />
+      
+      {/* Main Section */}
       <Route path="/campaigns" component={Campaigns} />
       <Route path="/content-library" component={ContentLibrary} />
       <Route path="/scheduling" component={Scheduling} />
-      <Route path="/analytics" component={Analytics} />
+      
+      {/* Affiliate Management Section */}
       <Route path="/affiliate-programs" component={AffiliatePrograms} />
+      <Route path="/commissions" component={Commissions} />
+      <Route path="/affiliate-links" component={AffiliateLinks} />
+      
+      {/* Analytics Section */}
+      <Route path="/analytics" component={Analytics} />
+      <Route path="/audience" component={Audience} />
+      
+      {/* Other Pages */}
       <Route path="/settings" component={Settings} />
+      <Route path="/help" component={Help} />
+      
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
