@@ -50,31 +50,48 @@ export function RedditAuth() {
     }
   });
 
-  const handleConnect = () => {
+  const handleConnect = async () => {
     setLoading(true);
-    // Open Reddit OAuth authorization page in a new window
-    window.open("/api/auth/reddit/authorize", "_blank", "width=800,height=700");
-    
-    // Set up a timer to check for auth status updates
-    const checkAuthStatus = setInterval(() => {
-      refetch().then((result) => {
-        if (result.data?.authenticated) {
+    try {
+      // Get the authorization URL from our API
+      const response = await fetch("/api/auth/reddit/authorize");
+      const data = await response.json();
+      
+      if (data.authUrl) {
+        // Open Reddit OAuth authorization page in a new window
+        window.open(data.authUrl, "_blank", "width=800,height=700");
+        
+        // Set up a timer to check for auth status updates
+        const checkAuthStatus = setInterval(() => {
+          refetch().then((result) => {
+            if (result.data?.authenticated) {
+              clearInterval(checkAuthStatus);
+              setLoading(false);
+              toast({
+                title: "Success",
+                description: "Your Reddit account has been connected!",
+                variant: "default",
+              });
+            }
+          });
+        }, 2000);
+
+        // Stop checking after 2 minutes
+        setTimeout(() => {
           clearInterval(checkAuthStatus);
           setLoading(false);
-          toast({
-            title: "Success",
-            description: "Your Reddit account has been connected!",
-            variant: "default",
-          });
-        }
-      });
-    }, 2000);
-
-    // Stop checking after 2 minutes
-    setTimeout(() => {
-      clearInterval(checkAuthStatus);
+        }, 120000);
+      } else {
+        throw new Error("Failed to get authorization URL");
+      }
+    } catch (error) {
       setLoading(false);
-    }, 120000);
+      toast({
+        title: "Error",
+        description: `Failed to connect Reddit account: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDisconnect = () => {

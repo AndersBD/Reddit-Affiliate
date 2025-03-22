@@ -113,3 +113,23 @@ export const deleteContentTemplate = async (id: number) => {
   await apiRequest("DELETE", `/api/content-templates/${id}`);
   return { success: true };
 };
+
+// Reddit Authentication API
+export const getRedditAuthUrl = async () => {
+  const response = await fetch("/api/auth/reddit/authorize", {
+    credentials: "include",
+  });
+  return response.json();
+};
+
+export const getRedditAuthStatus = async () => {
+  const response = await fetch("/api/auth/reddit/status", {
+    credentials: "include",
+  });
+  return response.json();
+};
+
+export const disconnectRedditAccount = async () => {
+  const response = await apiRequest("POST", "/api/auth/reddit/disconnect", {});
+  return response.json();
+};
