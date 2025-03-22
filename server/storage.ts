@@ -6,7 +6,10 @@ import {
   type PerformanceMetric, type InsertPerformanceMetric,
   type Activity, type InsertActivity,
   type ContentTemplate, type InsertContentTemplate,
-  type User, type InsertUser
+  type User, type InsertUser,
+  type Keyword, type InsertKeyword,
+  type RedditOpportunity, type InsertRedditOpportunity,
+  type ContentQueueItem, type InsertContentQueueItem
 } from "@shared/schema";
 
 import { query, toCamelCase, toSnakeCase, initializeDatabase } from "./db";
@@ -70,6 +73,38 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
+  
+  // Keywords
+  getKeywords(): Promise<Keyword[]>;
+  getKeyword(id: number): Promise<Keyword | undefined>;
+  getKeywordByText(keyword: string): Promise<Keyword | undefined>;
+  getKeywordsByCampaign(campaignId: number): Promise<Keyword[]>;
+  getKeywordsByAffiliateProgram(affiliateProgramId: number): Promise<Keyword[]>;
+  createKeyword(keyword: InsertKeyword): Promise<Keyword>;
+  updateKeyword(id: number, keyword: Partial<InsertKeyword>): Promise<Keyword | undefined>;
+  deleteKeyword(id: number): Promise<boolean>;
+  
+  // Reddit Opportunities
+  getRedditOpportunities(limit?: number): Promise<RedditOpportunity[]>;
+  getRedditOpportunitiesByKeyword(keywordId: number): Promise<RedditOpportunity[]>;
+  getRedditOpportunitiesByStatus(status: string): Promise<RedditOpportunity[]>;
+  getRedditOpportunity(id: number): Promise<RedditOpportunity | undefined>;
+  getRedditOpportunityByUrl(url: string): Promise<RedditOpportunity | undefined>;
+  createRedditOpportunity(opportunity: InsertRedditOpportunity): Promise<RedditOpportunity>;
+  updateRedditOpportunity(id: number, opportunity: Partial<InsertRedditOpportunity>): Promise<RedditOpportunity | undefined>;
+  deleteRedditOpportunity(id: number): Promise<boolean>;
+  getTopOpportunities(limit?: number): Promise<RedditOpportunity[]>;
+  
+  // Content Queue
+  getContentQueueItems(): Promise<ContentQueueItem[]>;
+  getContentQueueItemsByCampaign(campaignId: number): Promise<ContentQueueItem[]>;
+  getContentQueueItemsByOpportunity(opportunityId: number): Promise<ContentQueueItem[]>;
+  getContentQueueItemsByStatus(status: string): Promise<ContentQueueItem[]>;
+  getContentQueueItem(id: number): Promise<ContentQueueItem | undefined>;
+  createContentQueueItem(item: InsertContentQueueItem): Promise<ContentQueueItem>;
+  updateContentQueueItem(id: number, item: Partial<InsertContentQueueItem>): Promise<ContentQueueItem | undefined>;
+  deleteContentQueueItem(id: number): Promise<boolean>;
+  getPendingContentQueueItems(): Promise<ContentQueueItem[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -81,6 +116,9 @@ export class MemStorage implements IStorage {
   private activities: Map<number, Activity>;
   private contentTemplates: Map<number, ContentTemplate>;
   private users: Map<number, User>;
+  private keywords: Map<number, Keyword>;
+  private redditOpportunities: Map<number, RedditOpportunity>;
+  private contentQueue: Map<number, ContentQueueItem>;
 
   private currentIds: {
     affiliatePrograms: number;
@@ -91,6 +129,9 @@ export class MemStorage implements IStorage {
     activities: number;
     contentTemplates: number;
     users: number;
+    keywords: number;
+    redditOpportunities: number;
+    contentQueue: number;
   };
 
   constructor() {
@@ -102,6 +143,9 @@ export class MemStorage implements IStorage {
     this.activities = new Map();
     this.contentTemplates = new Map();
     this.users = new Map();
+    this.keywords = new Map();
+    this.redditOpportunities = new Map();
+    this.contentQueue = new Map();
 
     this.currentIds = {
       affiliatePrograms: 1,
@@ -112,6 +156,9 @@ export class MemStorage implements IStorage {
       activities: 1,
       contentTemplates: 1,
       users: 1,
+      keywords: 1,
+      redditOpportunities: 1,
+      contentQueue: 1,
     };
 
     // Initialize with some sample data

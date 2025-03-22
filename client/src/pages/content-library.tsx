@@ -78,6 +78,14 @@ const ContentLibrary = () => {
   const { data: contentTemplates, isLoading: templatesLoading } = useQuery({
     queryKey: ['/api/content-templates'],
   });
+  
+  const { data: keywords, isLoading: keywordsLoading } = useQuery({
+    queryKey: ['/api/keywords'],
+  });
+  
+  const { data: opportunities, isLoading: opportunitiesLoading } = useQuery({
+    queryKey: ['/api/opportunities'],
+  });
 
   // Load post data if we're on the edit route
   const { data: postData, isLoading: postLoading } = useQuery({
@@ -323,6 +331,7 @@ const ContentLibrary = () => {
           <TabsTrigger value="create" className="flex-1">Create Content</TabsTrigger>
           <TabsTrigger value="library" className="flex-1">Content Library</TabsTrigger>
           <TabsTrigger value="templates" className="flex-1">Content Templates</TabsTrigger>
+          <TabsTrigger value="opportunities" className="flex-1">Opportunities</TabsTrigger>
         </TabsList>
         
         <TabsContent value="create">
