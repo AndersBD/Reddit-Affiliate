@@ -484,8 +484,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         details: { 
           processedKeywords: keywordResults.processedKeywords,
           recommendedKeywords: keywordResults.recommendedNextKeywords
-        },
-        timestamp: new Date()
+        }
       });
       
       res.json(keywordResults);
@@ -521,8 +520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           keyword,
           productName,
           opportunityScore: researchResults.opportunityScore
-        },
-        timestamp: new Date()
+        }
       });
       
       // Return all results
