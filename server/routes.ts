@@ -14,6 +14,8 @@ import { createRedditPost, postComment, getSubredditPosts, getPostComments, getS
 import { schedulePost, cancelScheduledPost, reschedulePost, getScheduledPosts, schedulePostsForCampaign, initializeScheduler } from "./services/scheduler";
 import { searchRedditOpportunities, batchProcessKeywords, scoreAndQueueOpportunities } from "./services/serp-scraper";
 import { triggerOpportunityProcessing, initializeOpportunityScheduler, triggerKeywordScan, triggerOpportunityScoring } from "./services/opportunity-scheduler";
+import { initializeCategories, categorizeSubreddit, categorizeAllSubreddits, getSubredditsByCategory, findRelevantSubredditsForProgram } from "./services/subreddit-categorizer";
+import { analyzeOpportunity, rankOpportunitiesForCampaign, findTemplatesForOpportunity } from "./services/opportunity-analyzer";
 import { z } from "zod";
 import { 
   insertAffiliateProgramSchema, 
