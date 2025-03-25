@@ -77,10 +77,7 @@ const ContentLibrary = () => {
   const [isScanning, setIsScanning] = useState<boolean>(false);
   
   // Real-time Reddit opportunity fetching state
-  const [isFetchingLive, setIsFetchingLive] = useState<boolean>(false);
-  const [selectedSubreddits, setSelectedSubreddits] = useState<string[]>([]);
-  const [redditFetchMode, setRedditFetchMode] = useState<'new' | 'hot' | 'top' | 'rising'>('hot');
-  const [redditFetchLimit, setRedditFetchLimit] = useState<number>(10);
+  // Reddit opportunity fetching has been moved to the RedditOpportunityFetcher component
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -296,26 +293,7 @@ const ContentLibrary = () => {
     }
   });
   
-  // Live Reddit opportunity fetching mutations
-  const fetchLiveOpportunitiesMutation = useMutation({
-    mutationFn: fetchLiveOpportunities,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/opportunities'] });
-      setIsFetchingLive(false);
-      toast({
-        title: "Live Data Fetched",
-        description: `Found ${data.length || 0} new opportunities from Reddit.`,
-      });
-    },
-    onError: (error) => {
-      setIsFetchingLive(false);
-      toast({
-        title: "Fetch Failed",
-        description: "Failed to fetch live Reddit data. Please check API credentials.",
-        variant: "destructive",
-      });
-    }
-  });
+  // Reddit opportunity fetching mutations moved to RedditOpportunityFetcher component
   
   const analyzeOpportunitiesMutation = useMutation({
     mutationFn: (campaignId: number) => analyzeOpportunities(campaignId, 20),
@@ -554,57 +532,7 @@ const ContentLibrary = () => {
     });
   };
   
-  // Fetch live Reddit opportunities
-  const handleFetchLiveOpportunities = () => {
-    if (selectedSubreddits.length === 0 && !selectedCampaign) {
-      toast({
-        title: "Missing Information",
-        description: "Please select at least one subreddit or a campaign to fetch from.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsFetchingLive(true);
-    
-    // Determine subreddits to fetch from
-    const subredditsToFetch = selectedSubreddits.length > 0 
-      ? selectedSubreddits 
-      : getSubredditsForCampaign();
-    
-    fetchLiveOpportunitiesMutation.mutate({
-      subreddits: subredditsToFetch,
-      mode: redditFetchMode,
-      limit: redditFetchLimit
-    }, {
-      onSettled: () => {
-        setIsFetchingLive(false);
-      }
-    });
-  };
-  
-  // Analyze opportunities for selected campaign
-  const handleAnalyzeOpportunities = () => {
-    if (!selectedCampaign) {
-      toast({
-        title: "Missing Information",
-        description: "Please select a campaign to analyze opportunities for.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    analyzeOpportunitiesMutation.mutate(parseInt(selectedCampaign));
-  };
-  
-  // Toggle subreddit selection for live fetching
-  const toggleSubredditSelection = (subreddit: string) => {
-    setSelectedSubreddits(prev => 
-      prev.includes(subreddit)
-        ? prev.filter(s => s !== subreddit)
-        : [...prev, subreddit]
-    );
-  };
+  // Reddit opportunity fetching functions moved to RedditOpportunityFetcher component
 
   return (
     <>
@@ -950,132 +878,10 @@ const ContentLibrary = () => {
         </TabsContent>
         
         <TabsContent value="opportunities">
-          {/* Real-time Opportunity Fetching Card */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center">
-                <RefreshCw className="h-5 w-5 mr-2 text-primary" />
-                Real-time Reddit Opportunity Fetching
-              </CardTitle>
-              <CardDescription>
-                Fetch and analyze live threads from Reddit to find affiliate marketing opportunities
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label>Select Campaign (Optional)</Label>
-                  <Select value={selectedCampaign} onValueChange={setSelectedCampaign}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a campaign" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">None</SelectItem>
-                      {!campaignsLoading && campaigns?.map((campaign: any) => (
-                        <SelectItem key={campaign.id} value={campaign.id.toString()}>
-                          {campaign.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label>Reddit Fetch Mode</Label>
-                  <div className="grid grid-cols-4 gap-2">
-                    <Button 
-                      variant={redditFetchMode === 'new' ? 'default' : 'outline'} 
-                      className="w-full"
-                      onClick={() => setRedditFetchMode('new')}
-                    >
-                      New
-                    </Button>
-                    <Button 
-                      variant={redditFetchMode === 'hot' ? 'default' : 'outline'} 
-                      className="w-full"
-                      onClick={() => setRedditFetchMode('hot')}
-                    >
-                      Hot
-                    </Button>
-                    <Button 
-                      variant={redditFetchMode === 'top' ? 'default' : 'outline'} 
-                      className="w-full"
-                      onClick={() => setRedditFetchMode('top')}
-                    >
-                      Top
-                    </Button>
-                    <Button 
-                      variant={redditFetchMode === 'rising' ? 'default' : 'outline'} 
-                      className="w-full"
-                      onClick={() => setRedditFetchMode('rising')}
-                    >
-                      Rising
-                    </Button>
-                  </div>
-                </div>
-                
-                <div>
-                  <Label>Thread Limit</Label>
-                  <Input 
-                    type="number" 
-                    min="1" 
-                    max="50" 
-                    value={redditFetchLimit.toString()} 
-                    onChange={(e) => setRedditFetchLimit(parseInt(e.target.value) || 10)}
-                  />
-                </div>
-                
-                <div>
-                  <Label className="mb-2 block">Select Specific Subreddits (Optional)</Label>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {selectedSubreddits.map(subreddit => (
-                      <Badge key={subreddit} variant="secondary" className="cursor-pointer" onClick={() => toggleSubredditSelection(subreddit)}>
-                        {subreddit} <span className="ml-1">×</span>
-                      </Badge>
-                    ))}
-                    {selectedSubreddits.length === 0 && (
-                      <span className="text-sm text-gray-500">
-                        {selectedCampaign ? "Using subreddits from selected campaign" : "No subreddits selected"}
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    If no subreddits are selected, we'll use the ones from the selected campaign.
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <div className="text-sm text-gray-500">
-                <span className="text-primary font-medium">Note:</span> Reddit API credentials required
-              </div>
-              <div className="space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={handleAnalyzeOpportunities}
-                  disabled={!selectedCampaign}
-                >
-                  Analyze Opportunities
-                </Button>
-                <Button
-                  onClick={handleFetchLiveOpportunities}
-                  disabled={isFetchingLive}
-                >
-                  {isFetchingLive ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Fetching...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                      Fetch Opportunities
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
+          {/* Enhanced Reddit Opportunity Fetcher Component */}
+          <div className="mb-6">
+            <RedditOpportunityFetcher />
+          </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
             {/* Summary Cards */}
