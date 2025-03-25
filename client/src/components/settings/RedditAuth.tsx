@@ -6,7 +6,12 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Check, ExternalLink, Info, Loader2 } from 'lucide-react';
-import { getRedditAuthStatus, disconnectRedditAccount } from '@/lib/api';
+import { 
+  getRedditAuthStatus, 
+  disconnectRedditAccount, 
+  saveRedditCredentials,
+  checkRedditCredentials
+} from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const RedditAuth = () => {
@@ -21,6 +26,12 @@ const RedditAuth = () => {
   const { data: authStatus, isLoading: statusLoading, refetch: refetchStatus } = useQuery({
     queryKey: ['/api/auth/reddit/status'],
     queryFn: getRedditAuthStatus
+  });
+  
+  // Check if Reddit credentials are configured
+  const { data: credentialsData, isLoading: credentialsLoading } = useQuery({
+    queryKey: ['/api/auth/reddit/credentials'],
+    queryFn: checkRedditCredentials
   });
 
   // Set default redirect URI based on current URL
@@ -51,7 +62,30 @@ const RedditAuth = () => {
   });
 
   // Save Reddit API credentials
-  const handleSaveCredentials = async () => {
+  const saveCredentialsMutation = useMutation({
+    mutationFn: (credentials: { clientId: string; clientSecret: string; redirectUri: string; }) => {
+      return saveRedditCredentials(credentials);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Credentials saved",
+        description: "Reddit API credentials have been saved successfully.",
+      });
+      // Refresh both queries
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/reddit/status'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/reddit/credentials'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Save failed",
+        description: "Could not save Reddit API credentials. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Handle save credentials
+  const handleSaveCredentials = () => {
     if (!clientId || !clientSecret || !redirectUri) {
       toast({
         title: "Missing information",
@@ -61,31 +95,7 @@ const RedditAuth = () => {
       return;
     }
 
-    setIsSaving(true);
-    
-    try {
-      // Add credentials to environment
-      await fetch('/api/auth/reddit/credentials', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clientId, clientSecret, redirectUri })
-      });
-      
-      toast({
-        title: "Credentials saved",
-        description: "Reddit API credentials have been saved successfully.",
-      });
-      
-      refetchStatus();
-    } catch (error) {
-      toast({
-        title: "Save failed",
-        description: "Could not save Reddit API credentials. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
+    saveCredentialsMutation.mutate({ clientId, clientSecret, redirectUri });
   };
 
   // Start authorization flow

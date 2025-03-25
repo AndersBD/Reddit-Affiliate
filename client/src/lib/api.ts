@@ -143,6 +143,11 @@ export const saveRedditCredentials = async (credentials: {
   return response.json();
 };
 
+export const checkRedditCredentials = async () => {
+  const response = await apiRequest("GET", "/api/auth/reddit/credentials");
+  return response.json();
+};
+
 // Keyword API
 export const createKeyword = async (data: any) => {
   const response = await apiRequest("POST", "/api/keywords", data);
