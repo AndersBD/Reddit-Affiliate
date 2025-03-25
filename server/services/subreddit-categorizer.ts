@@ -240,7 +240,7 @@ export async function getSubredditsByCategory(categoryName: string, limit: numbe
     const mappings = await storage.getSubredditCategoryMapsBySubreddit(subreddit.id);
     const relevantMapping = mappings.find(m => m.categoryId === category.id);
     
-    if (relevantMapping) {
+    if (relevantMapping && typeof relevantMapping.relevanceScore === 'number') {
       result.push({
         subreddit,
         relevanceScore: relevantMapping.relevanceScore

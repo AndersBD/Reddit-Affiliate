@@ -1054,9 +1054,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Advanced Opportunity Analysis Routes
+  apiRouter.get("/categories", async (req, res) => {
+    try {
+      await initializeCategories();
+      const categories = await storage.getSubredditCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      res.status(500).json({ message: "Error fetching categories" });
+    }
+  });
+
+  apiRouter.get("/opportunities/top", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const opportunities = await storage.getTopOpportunities(limit);
+      res.json(opportunities);
+    } catch (error) {
+      console.error("Error fetching top opportunities:", error);
+      res.status(500).json({ message: "Error fetching top opportunities" });
+    }
+  });
+
+  apiRouter.get("/opportunities/analyze/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const opportunity = await storage.getRedditOpportunity(id);
+      
+      if (!opportunity) {
+        return res.status(404).json({ message: "Opportunity not found" });
+      }
+      
+      // Get affiliate program (optional)
+      let affiliateProgram = undefined;
+      if (req.query.affiliateProgramId) {
+        const programId = parseInt(req.query.affiliateProgramId as string);
+        affiliateProgram = await storage.getAffiliateProgram(programId);
+      } else if (opportunity.affiliateProgramId) {
+        affiliateProgram = await storage.getAffiliateProgram(opportunity.affiliateProgramId);
+      }
+      
+      if (!affiliateProgram) {
+        return res.status(400).json({ message: "Affiliate program is required for analysis" });
+      }
+      
+      // Analyze the opportunity
+      const analysis = await analyzeOpportunity(opportunity, affiliateProgram);
+      
+      res.json({
+        opportunity,
+        analysis,
+        affiliateProgram
+      });
+    } catch (error) {
+      console.error(`Error analyzing opportunity ${req.params.id}:`, error);
+      res.status(500).json({ message: "Error analyzing opportunity" });
+    }
+  });
+
+  apiRouter.get("/opportunities/rank/:campaignId", async (req, res) => {
+    try {
+      const campaignId = parseInt(req.params.campaignId);
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      
+      const rankedOpportunities = await rankOpportunitiesForCampaign(campaignId, limit);
+      
+      res.json(rankedOpportunities);
+    } catch (error) {
+      console.error(`Error ranking opportunities for campaign ${req.params.campaignId}:`, error);
+      res.status(500).json({ message: "Error ranking opportunities" });
+    }
+  });
+
+  apiRouter.get("/subreddits/categorize/:id", async (req, res) => {
+    try {
+      const subredditId = parseInt(req.params.id);
+      const categories = await categorizeSubreddit(subredditId);
+      
+      res.json(categories);
+    } catch (error) {
+      console.error(`Error categorizing subreddit ${req.params.id}:`, error);
+      res.status(500).json({ message: "Error categorizing subreddit" });
+    }
+  });
+
+  apiRouter.get("/subreddits/by-category/:categoryName", async (req, res) => {
+    try {
+      const categoryName = req.params.categoryName;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      
+      const subreddits = await getSubredditsByCategory(categoryName, limit);
+      
+      res.json(subreddits);
+    } catch (error) {
+      console.error(`Error fetching subreddits for category ${req.params.categoryName}:`, error);
+      res.status(500).json({ message: "Error fetching subreddits by category" });
+    }
+  });
+
+  apiRouter.get("/affiliate-programs/:id/relevant-subreddits", async (req, res) => {
+    try {
+      const programId = parseInt(req.params.id);
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      
+      const relevantSubreddits = await findRelevantSubredditsForProgram(programId, limit);
+      
+      res.json(relevantSubreddits);
+    } catch (error) {
+      console.error(`Error finding relevant subreddits for program ${req.params.id}:`, error);
+      res.status(500).json({ message: "Error finding relevant subreddits" });
+    }
+  });
+
   // Initialize Opportunity Scheduler
   initializeOpportunityScheduler().catch(err => {
     console.error("Error initializing opportunity scheduler:", err);
+  });
+
+  // Initialize subreddit categories
+  initializeCategories().catch(err => {
+    console.error("Error initializing subreddit categories:", err);
   });
 
   // Register the API router

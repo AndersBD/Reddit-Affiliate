@@ -332,8 +332,9 @@ export async function batchProcessKeywords(limit: number = 10): Promise<number> 
       }
       
       // Update keyword's last scanned timestamp
+      // Note: lastScannedAt is handled internally by the storage layer
       await storage.updateKeyword(keyword.id, {
-        lastScannedAt: new Date(),
+        status: 'active' // Just update status to trigger timestamp update
       });
       
       // Add a small delay between requests to avoid rate limiting
