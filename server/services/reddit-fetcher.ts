@@ -1,10 +1,8 @@
 import { storage } from '../storage';
 import { RedditOpportunity, InsertRedditOpportunity, AffiliateProgram } from '@shared/schema';
 import { getAccessToken } from './redditAuth';
-import { determineThreadIntent } from './opportunity-analyzer';
-import { analyzeOpportunity } from './opportunity-analyzer';
+import { determineThreadIntent, ThreadIntent } from './opportunity-analyzer';
 import { REDDIT_CONFIG } from '../config';
-import { createOpenAIClient } from './openai';
 
 /**
  * Interface representing a Reddit thread with necessary metadata

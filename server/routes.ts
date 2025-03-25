@@ -1176,6 +1176,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
   initializeCategories().catch(err => {
     console.error("Error initializing subreddit categories:", err);
   });
+  
+  // Initialize Reddit opportunity fetcher
+  import('./services/reddit-fetcher').then(({ initializeOpportunityFetcher }) => {
+    initializeOpportunityFetcher();
+    console.log("Reddit opportunity fetcher initialized");
+  }).catch(err => {
+    console.error("Error initializing Reddit opportunity fetcher:", err);
+  });
+
+  // Reddit real-time data fetching endpoint
+  apiRouter.post("/fetch-opportunities", async (req, res) => {
+    try {
+      const { subreddits, mode, limit } = req.body;
+      const options = {
+        subreddits: subreddits || [],
+        mode: (mode as 'new' | 'hot' | 'top' | 'rising') || 'hot',
+        limit: limit ? parseInt(limit as string) : 25
+      };
+      
+      console.log(`Fetching opportunities with options:`, options);
+      
+      // Import the fetchOpportunities function
+      const { fetchOpportunities } = await import('./services/reddit-fetcher');
+      
+      // Fetch opportunities
+      const opportunities = await fetchOpportunities(
+        options.subreddits, 
+        options.mode, 
+        options.limit
+      );
+      
+      console.log(`Fetched ${opportunities.length} opportunities`);
+      
+      res.json({
+        success: true,
+        count: opportunities.length,
+        opportunities
+      });
+    } catch (error: any) {
+      console.error("Error fetching opportunities:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Error fetching opportunities",
+        error: error.message || String(error)
+      });
+    }
+  });
+  
+  // Endpoint to manually trigger opportunity analysis
+  apiRouter.post("/analyze-opportunities", async (req, res) => {
+    try {
+      // Import the necessary functions
+      const { rankOpportunitiesForCampaign } = await import('./services/opportunity-analyzer');
+      
+      // Get campaign ID from request or use default
+      const campaignId = req.body.campaignId ? parseInt(req.body.campaignId) : null;
+      const limit = req.body.limit ? parseInt(req.body.limit) : 10;
+      
+      if (!campaignId) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Campaign ID is required" 
+        });
+      }
+      
+      // Rank opportunities for the campaign
+      const rankedOpportunities = await rankOpportunitiesForCampaign(campaignId, limit);
+      
+      res.json({
+        success: true,
+        count: rankedOpportunities.length,
+        opportunities: rankedOpportunities
+      });
+    } catch (error: any) {
+      console.error("Error analyzing opportunities:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Error analyzing opportunities",
+        error: error.message || String(error)
+      });
+    }
+  });
 
   // Register the API router
   // Mount auth routes

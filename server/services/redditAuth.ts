@@ -16,14 +16,13 @@ let currentToken: TokenInfo | null = null;
 export function getAuthorizationUrl(state: string): string {
   const { clientId, redirectUri } = REDDIT_CONFIG;
   
-  const params = new URLSearchParams({
-    client_id: clientId,
-    response_type: 'code',
-    state,
-    redirect_uri: redirectUri,
-    duration: 'permanent',
-    scope: 'read submit identity'
-  });
+  const params = new URLSearchParams();
+  params.append('client_id', clientId || '');
+  params.append('response_type', 'code');
+  params.append('state', state);
+  params.append('redirect_uri', redirectUri);
+  params.append('duration', 'permanent');
+  params.append('scope', 'read submit identity');
   
   return `https://www.reddit.com/api/v1/authorize?${params.toString()}`;
 }
@@ -34,13 +33,12 @@ export function getAuthorizationUrl(state: string): string {
 export async function exchangeCodeForToken(code: string): Promise<TokenInfo> {
   const { clientId, clientSecret, redirectUri } = REDDIT_CONFIG;
   
-  const params = new URLSearchParams({
-    grant_type: 'authorization_code',
-    code,
-    redirect_uri: redirectUri
-  });
+  const params = new URLSearchParams();
+  params.append('grant_type', 'authorization_code');
+  params.append('code', code);
+  params.append('redirect_uri', redirectUri);
   
-  const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+  const authHeader = Buffer.from(`${clientId || ''}:${clientSecret || ''}`).toString('base64');
   
   const response = await fetch('https://www.reddit.com/api/v1/access_token', {
     method: 'POST',
@@ -78,12 +76,11 @@ export async function exchangeCodeForToken(code: string): Promise<TokenInfo> {
 export async function refreshAccessToken(refreshToken: string): Promise<TokenInfo> {
   const { clientId, clientSecret } = REDDIT_CONFIG;
   
-  const params = new URLSearchParams({
-    grant_type: 'refresh_token',
-    refresh_token: refreshToken
-  });
+  const params = new URLSearchParams();
+  params.append('grant_type', 'refresh_token');
+  params.append('refresh_token', refreshToken);
   
-  const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+  const authHeader = Buffer.from(`${clientId || ''}:${clientSecret || ''}`).toString('base64');
   
   const response = await fetch('https://www.reddit.com/api/v1/access_token', {
     method: 'POST',
@@ -123,11 +120,10 @@ export async function getAccessToken(): Promise<string> {
   if (!currentToken || !currentToken.refreshToken) {
     const { clientId, clientSecret } = REDDIT_CONFIG;
     
-    const params = new URLSearchParams({
-      grant_type: 'client_credentials'
-    });
+    const params = new URLSearchParams();
+    params.append('grant_type', 'client_credentials');
     
-    const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const authHeader = Buffer.from(`${clientId || ''}:${clientSecret || ''}`).toString('base64');
     
     try {
       const response = await fetch('https://www.reddit.com/api/v1/access_token', {
