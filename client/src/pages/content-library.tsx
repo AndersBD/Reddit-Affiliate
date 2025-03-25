@@ -7,6 +7,7 @@ import {
   TabsList, 
   TabsTrigger 
 } from "@/components/ui/tabs";
+import RedditOpportunityFetcher from "@/components/opportunities/RedditOpportunityFetcher";
 import {
   Card,
   CardContent,
