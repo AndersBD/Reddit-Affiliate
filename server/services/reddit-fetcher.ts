@@ -1,8 +1,8 @@
 import { storage } from '../storage';
 import { RedditOpportunity, InsertRedditOpportunity, AffiliateProgram } from '@shared/schema';
-import { getAccessToken } from './redditAuth';
+import { redditApiRequest } from './redditAuth';
 import { determineThreadIntent, ThreadIntent } from './opportunity-analyzer';
-import { REDDIT_CONFIG } from '../config';
+import { getRedditConfig } from '../config';
 
 /**
  * Interface representing a Reddit thread with necessary metadata
@@ -36,29 +36,11 @@ async function fetchThreadsFromSubreddit(
     // Remove 'r/' prefix if present
     const normalizedSubredditName = subredditName.replace(/^r\//, '');
     
-    // Get Reddit access token
-    const accessToken = await getAccessToken();
+    // Get Reddit config for user agent
+    const config = getRedditConfig();
     
-    if (!accessToken) {
-      console.error('Failed to get Reddit access token');
-      return [];
-    }
-    
-    // Fetch threads from the subreddit
-    const url = `https://oauth.reddit.com/r/${normalizedSubredditName}/${mode}?limit=${limit}`;
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'User-Agent': REDDIT_CONFIG.userAgent
-      }
-    });
-    
-    if (!response.ok) {
-      console.error(`Error fetching threads from r/${normalizedSubredditName}: ${response.status} ${response.statusText}`);
-      return [];
-    }
-    
-    const data = await response.json();
+    // Use redditApiRequest to fetch data from Reddit API
+    const data = await redditApiRequest(`/r/${normalizedSubredditName}/${mode}?limit=${limit}`);
     
     // Transform Reddit API response to our RedditThread format
     const threads: RedditThread[] = data.data.children.map((child: any) => {
