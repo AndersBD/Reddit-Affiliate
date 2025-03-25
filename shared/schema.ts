@@ -88,11 +88,13 @@ export const redditPosts = pgTable("reddit_posts", {
   postType: text("post_type").notNull(), // post or comment
   redditPostId: text("reddit_post_id"), // Actual Reddit post ID after posting
   scheduledTime: timestamp("scheduled_time"),
+  scheduledFor: timestamp("scheduled_for"), // Alias for scheduledTime used in storage
   postedTime: timestamp("posted_time"),
   upvotes: integer("upvotes").default(0),
   downvotes: integer("downvotes").default(0),
   commentCount: integer("comment_count").default(0),
   affiliateLink: text("affiliate_link"),
+  priority: text("priority"), // Added for priority queue functionality
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -203,14 +205,15 @@ export const keywords = pgTable("keywords", {
   status: text("status").notNull().default("active"), // active, paused, completed
   campaignId: integer("campaign_id"), // Optional linkage to campaign
   affiliateProgramId: integer("affiliate_program_id"), // Optional linkage to affiliate program
-  lastScanned: timestamp("last_scanned"),
+  priority: text("priority"), // Added high, medium, low priority field
+  lastScannedAt: timestamp("last_scanned"), // Changed to match usage in code
   dateAdded: timestamp("date_added").defaultNow(),
 });
 
 export const insertKeywordSchema = createInsertSchema(keywords).omit({
   id: true,
   dateAdded: true,
-  lastScanned: true,
+  lastScannedAt: true,
 });
 
 // Reddit opportunities found through SERP scraping
@@ -219,6 +222,7 @@ export const redditOpportunities = pgTable("reddit_opportunities", {
   keywordId: integer("keyword_id").notNull(),
   keyword: text("keyword").notNull(),
   redditPostUrl: text("reddit_post_url").notNull().unique(),
+  url: text("url"), // Alias for redditPostUrl used in storage implementation
   title: text("title").notNull(),
   snippet: text("snippet"),
   serpRank: integer("serp_rank"),
@@ -227,6 +231,7 @@ export const redditOpportunities = pgTable("reddit_opportunities", {
   subreddit: text("subreddit").notNull(),
   linkable: boolean("linkable").default(true),
   opportunityScore: doublePrecision("opportunity_score"),
+  priority: text("priority"), // Added for priority queue functionality
   actionType: text("action_type"), // comment, post
   status: text("status").notNull().default("new"), // new, queued, processed, rejected
   dateDiscovered: timestamp("date_discovered").defaultNow(),
@@ -249,6 +254,8 @@ export const contentQueue = pgTable("content_queue", {
   targetUrl: text("target_url"), // URL of post to comment on (if type=comment)
   content: text("content").notNull(),
   scheduledFor: timestamp("scheduled_for").notNull(),
+  scheduledTime: timestamp("scheduled_time"), // Alias for scheduledFor used in storage
+  priority: text("priority"), // Added for priority queue functionality
   status: text("status").notNull().default("scheduled"), // scheduled, posted, failed
   redditPostId: text("reddit_post_id"), // Actual ID once posted
   dateCreated: timestamp("date_created").defaultNow(),

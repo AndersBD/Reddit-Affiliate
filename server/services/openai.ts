@@ -1,10 +1,11 @@
 import OpenAI from "openai";
+import { OPENAI_CONFIG } from "../config";
 
 // Factory function for creating OpenAI client - makes testing easier
 export function createOpenAIClient() {
   // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
   return new OpenAI({ 
-    apiKey: process.env.OPENAI_API_KEY || "demo-api-key" 
+    apiKey: OPENAI_CONFIG.apiKey || "demo-api-key" 
   });
 }
 
@@ -96,7 +97,7 @@ export class AutonomousContentAgent implements ContentPipeline {
       
       try {
         const response = await openai.chat.completions.create({
-          model: "gpt-4o",
+          model: OPENAI_CONFIG.model,
           messages: [
             {
               role: "system",

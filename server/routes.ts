@@ -1059,7 +1059,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register the API router
   // Mount auth routes
-  app.use(authRoutes);
+  // Only use Reddit auth routes if credentials are configured
+  if (process.env.REDDIT_CLIENT_ID && process.env.REDDIT_CLIENT_SECRET) {
+    app.use(authRoutes);
+    console.log('Reddit authentication routes enabled');
+  } else {
+    console.log('Reddit authentication routes disabled - missing API credentials');
+  }
   
   // Mount other API routes
   app.use("/api", apiRouter);

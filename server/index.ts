@@ -4,6 +4,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import { initializeDatabase } from "./db";
 import session from "express-session";
 import { randomBytes } from "crypto";
+import { PORT, SESSION_CONFIG } from "./config";
 
 const app = express();
 app.use(express.json());
@@ -11,14 +12,11 @@ app.use(express.urlencoded({ extended: false }));
 
 // Set up session middleware with secure cookie
 app.use(session({
-  secret: process.env.SESSION_SECRET || randomBytes(32).toString('hex'),
+  ...SESSION_CONFIG,
   name: 'reddit_auth_session',
-  resave: false,
-  saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    ...SESSION_CONFIG.cookie,
+    httpOnly: true
   }
 }));
 
@@ -80,12 +78,12 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Try to serve the app on port 3000, but fall back to 5000 if unavailable
-  // This serves both the API and the client.
-  const preferredPort = process.env.NODE_ENV === 'production' ? 3000 : (process.env.PORT || 3000);
+  // Use centralized port configuration with fallback
+  // This serves both the API and the client
   const fallbackPort = 5000;
-  let port = preferredPort;
-  // Try to listen on preferred port, fall back to alternative if that fails
+  let port = PORT;
+  
+  // Try to listen on configured port, fall back to alternative if that fails
   server.listen({
     port,
     host: "0.0.0.0",

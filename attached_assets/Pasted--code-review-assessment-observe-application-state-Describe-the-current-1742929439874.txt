@@ -1,0 +1,34 @@
+{
+  "code_review_assessment": {
+    "observe": {
+      "application_state": "Describe the current state of your application, including which components or modules are affected by dependency or deployment issues.",
+      "environment_details": "Specify your deployment environment (e.g., staging, production), operating system, browser/device context, and any relevant user scenarios.",
+      "dependency_symptoms": "List any errors, warnings, or version conflicts related to dependencies (e.g., package mismatches, missing modules).",
+      "deployment_errors": "Detail any errors or unexpected behaviors observed during deployment (e.g., failed builds, runtime issues).",
+      "reproduction_steps": "Provide the exact sequence of steps required to reproduce the issue.",
+      "recent_changes": "Document recent changes to the codebase, dependency configurations, or deployment settings that may have triggered these issues."
+    },
+    "orient": {
+      "pattern_recognition": "Does this issue resemble any known patterns or previous problems? Explain the similarities.",
+      "component_interactions": "How do interactions between different components or dependencies contribute to this issue?",
+      "platform_specific_factors": "Are there any platform-specific features, limitations, or configurations that might be relevant?",
+      "data_flow_analysis": "How is data moving through the system at the point of failure? Identify any bottlenecks or breakpoints.",
+      "hypotheses": "List the most likely causes of these issues, ranked by probability."
+    },
+    "decide": {
+      "solution_options": "What potential solutions could address the identified dependency and deployment issues?",
+      "tradeoff_analysis": "Discuss the tradeoffs (complexity, time, risk) for each solution option.",
+      "implementation_approach": "Determine whether the fix should be a quick patch or a more comprehensive refactor.",
+      "testing_strategy": "Describe the tests and validation steps that will verify the solution resolves the issues.",
+      "selected_solution": "Identify the solution that offers the best balance of effectiveness and safety."
+    },
+    "act": {
+      "implementation_plan": "Detail the specific code changes and configuration updates needed, listing the steps in order.",
+      "fallback_preparation": "Outline a rollback plan in case the solution introduces further issues.",
+      "verification_steps": "Specify the exact tests and criteria that will confirm the issue has been resolved.",
+      "documentation_updates": "List any documentation or guides that need updating to reflect the changes made.",
+      "knowledge_sharing": "Explain how you will share what you've learned with your team to prevent similar issues in the future."
+    },
+    "final_readiness_assessment": "Based on all the above, confirm whether you are 100% ready to proceed safely with the deployment."
+  }
+}
