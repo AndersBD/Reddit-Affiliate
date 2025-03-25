@@ -134,6 +134,15 @@ export const disconnectRedditAccount = async () => {
   return response.json();
 };
 
+export const saveRedditCredentials = async (credentials: {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+}) => {
+  const response = await apiRequest("POST", "/api/auth/reddit/credentials", credentials);
+  return response.json();
+};
+
 // Keyword API
 export const createKeyword = async (data: any) => {
   const response = await apiRequest("POST", "/api/keywords", data);
