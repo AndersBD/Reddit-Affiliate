@@ -204,10 +204,11 @@ export async function getAccessToken(): Promise<string> {
  */
 export async function redditApiRequest(
   endpoint: string,
+  tokenOverride?: string,
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
   body?: any
 ): Promise<any> {
-  const accessToken = await getAccessToken();
+  const accessToken = tokenOverride || await getAccessToken();
   
   if (!accessToken) {
     throw new Error('Failed to get Reddit access token');

@@ -18,7 +18,6 @@ const RedditAuth = () => {
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
   const [redirectUri, setRedirectUri] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -99,18 +98,29 @@ const RedditAuth = () => {
   };
 
   // Start authorization flow
-  const handleAuthorize = async () => {
-    try {
+  const authorizeMutation = useMutation({
+    mutationFn: async () => {
       const response = await fetch('/api/auth/reddit/authorize');
-      const { url } = await response.json();
-      window.location.href = url;
-    } catch (error) {
+      if (!response.ok) {
+        throw new Error('Failed to start authorization');
+      }
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      window.location.href = data.url;
+    },
+    onError: (error) => {
       toast({
         title: "Authorization failed",
         description: "Could not start the Reddit OAuth flow. Please try again.",
         variant: "destructive",
       });
     }
+  });
+
+  // Handle authorize
+  const handleAuthorize = () => {
+    authorizeMutation.mutate();
   };
 
   // Handle disconnect
@@ -226,9 +236,9 @@ const RedditAuth = () => {
               variant="outline" 
               className="mr-2" 
               onClick={handleSaveCredentials} 
-              disabled={isSaving || !clientId || !clientSecret || !redirectUri}
+              disabled={saveCredentialsMutation.isPending || !clientId || !clientSecret || !redirectUri}
             >
-              {isSaving ? (
+              {saveCredentialsMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
@@ -239,9 +249,16 @@ const RedditAuth = () => {
             </Button>
             <Button 
               onClick={handleAuthorize} 
-              disabled={!authStatus?.hasCredentials}
+              disabled={authorizeMutation.isPending || credentialsLoading || !credentialsData?.hasCredentials}
             >
-              Authorize with Reddit
+              {authorizeMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Authorizing...
+                </>
+              ) : (
+                "Authorize with Reddit"
+              )}
             </Button>
           </>
         )}

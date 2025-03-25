@@ -30,10 +30,10 @@ router.get("/api/auth/reddit/authorize", (req: Request, res: Response) => {
     req.session.oauthState = state;
     
     // Generate authorization URL
-    const authUrl = redditAuth.getAuthorizationUrl(state);
+    const url = redditAuth.getAuthorizationUrl(state);
     
-    // Redirect to Reddit authorization page
-    res.json({ authUrl });
+    // Return the authorization URL
+    res.json({ url });
   } catch (error) {
     console.error("Error generating authorization URL:", error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
