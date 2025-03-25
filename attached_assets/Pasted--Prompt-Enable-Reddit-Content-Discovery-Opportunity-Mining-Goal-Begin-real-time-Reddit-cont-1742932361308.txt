@@ -1,0 +1,87 @@
+🚀 Prompt: Enable Reddit Content Discovery + Opportunity Mining
+🎯 Goal: Begin real-time Reddit content research based on the 200+ mapped subreddits and tagged affiliate programs.
+
+🧱 Core Capabilities to Build:
+
+1. Reddit Post Crawler (via Reddit API or Pushshift)
+Pull the latest 100–200 threads per subreddit (limit via subreddit.limit)
+
+Store:
+
+Title
+
+Body (selftext)
+
+Upvotes, Comments, Flair
+
+Posted Date, Author
+
+2. Thread Intent Detection
+For each pulled thread, auto-classify:
+
+“Intent”:
+
+💡 DISCOVERY: “What’s the best AI writer?”
+
+🤔 COMPARISON: “Jasper vs Koala AI?”
+
+🚀 SHOWCASE: “Here’s how I used Pictory AI for YouTube”
+
+❓ QUESTION: “How do you automate LinkedIn outreach?”
+
+Optional: Use keyword-matching or LLM model (GPT call) for intent classification
+
+3. Affiliate Match Scoring
+For each thread, determine:
+
+✅ Affiliate Relevance Score (0–100) based on:
+
+Keyword overlap with affiliate tags (e.g., “Jasper” in AI Writer threads)
+
+Product category match (e.g., AI video + Pictory)
+
+🔗 Suggested affiliate programs to insert (up to 3 per thread)
+
+4. Opportunity Tracker Output
+Store as:
+
+json
+Copy
+Edit
+{
+  "thread_id": "abc123",
+  "subreddit": "r/ContentMarketing",
+  "title": "Best tool for generating SEO briefs?",
+  "intent": "DISCOVERY",
+  "score": 89,
+  "matched_affiliates": [
+    { "program": "Frase", "link": "https://...", "promo_code": "SEO20" }
+  ],
+  "recommended_action": "Insert comment explaining how Frase auto-generates briefs with your affiliate link."
+}
+5. Daily Opportunity Summary
+Create a UI or CLI output showing:
+
+🔥 High-Intent Threads This Week
+
+📈 Subreddits with Most Affiliate Matches
+
+💬 Suggested Comments Queue (auto-generated blurbs with placeholders for affiliate links)
+
+📌 Optional (Advanced):
+If feasible, allow toggling between:
+
+Real-time live API mode
+
+Pushshift archive mode (for historical post mining)
+
+🛠 What's Next?
+Here’s what the Replit Agent can do next in priority order:
+
+✅ Finalize schema fixes and resolve remaining TS errors.
+
+🧠 Implement the Reddit thread fetcher with intent classification + tag matching.
+
+🔗 Activate the affiliate matching logic using stored metadata (link + promo code).
+
+📊 Generate ranked opportunity list for daily posting/comment planning.
