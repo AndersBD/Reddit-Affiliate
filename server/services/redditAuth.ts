@@ -208,9 +208,9 @@ export async function redditApiRequest(
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
   body?: any
 ): Promise<any> {
-  const accessToken = tokenOverride || await getAccessToken();
+  const token = tokenOverride || await getAccessToken();
   
-  if (!accessToken) {
+  if (!token) {
     throw new Error('Failed to get Reddit access token');
   }
   
@@ -218,7 +218,7 @@ export async function redditApiRequest(
   const config = getRedditConfig();
   
   const headers: HeadersInit = {
-    'Authorization': `Bearer ${accessToken}`,
+    'Authorization': `Bearer ${token}`,
     'User-Agent': config.userAgent,
     'Content-Type': 'application/json'
   };

@@ -74,7 +74,7 @@ router.get("/api/auth/reddit/callback", async (req: Request, res: Response) => {
     req.session.redditToken = tokenInfo;
     
     // Fetch user information to get username
-    const userInfo = await redditAuth.redditApiRequest('/api/v1/me', tokenInfo.accessToken);
+    const userInfo = await redditAuth.redditApiRequest('/api/v1/me', tokenInfo.accessToken, 'GET');
     req.session.redditUsername = userInfo.name;
     
     // Redirect back to settings page
