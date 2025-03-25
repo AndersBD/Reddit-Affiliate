@@ -1091,8 +1091,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.query.affiliateProgramId) {
         const programId = parseInt(req.query.affiliateProgramId as string);
         affiliateProgram = await storage.getAffiliateProgram(programId);
-      } else if (opportunity.affiliateProgramId) {
-        affiliateProgram = await storage.getAffiliateProgram(opportunity.affiliateProgramId);
+      } else if ('affiliateProgramId' in opportunity && opportunity.affiliateProgramId) {
+        affiliateProgram = await storage.getAffiliateProgram(opportunity.affiliateProgramId as number);
       }
       
       if (!affiliateProgram) {

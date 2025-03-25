@@ -234,6 +234,7 @@ export const redditOpportunities = pgTable("reddit_opportunities", {
   priority: text("priority"), // Added for priority queue functionality
   actionType: text("action_type"), // comment, post
   status: text("status").notNull().default("new"), // new, queued, processed, rejected
+  affiliateProgramId: integer("affiliate_program_id"), // Link to affiliated program for this opportunity
   dateDiscovered: timestamp("date_discovered").defaultNow(),
   dateProcessed: timestamp("date_processed"),
 });

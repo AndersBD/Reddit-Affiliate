@@ -191,3 +191,45 @@ export const deleteContentQueueItem = async (id: number) => {
   await apiRequest("DELETE", `/api/content-queue/${id}`);
   return { success: true };
 };
+
+// Subreddit Categories API
+export const getSubredditCategories = async () => {
+  const response = await apiRequest("GET", "/api/categories");
+  return response.json();
+};
+
+export const categorizeSubreddit = async (subredditId: number) => {
+  const response = await apiRequest("GET", `/api/subreddits/categorize/${subredditId}`);
+  return response.json();
+};
+
+export const getSubredditsByCategory = async (categoryName: string, limit?: number) => {
+  const queryParams = limit ? `?limit=${limit}` : '';
+  const response = await apiRequest("GET", `/api/subreddits/by-category/${categoryName}${queryParams}`);
+  return response.json();
+};
+
+export const getRelevantSubredditsForProgram = async (programId: number, limit?: number) => {
+  const queryParams = limit ? `?limit=${limit}` : '';
+  const response = await apiRequest("GET", `/api/affiliate-programs/${programId}/relevant-subreddits${queryParams}`);
+  return response.json();
+};
+
+// Advanced Opportunity Analysis API
+export const getTopOpportunities = async (limit?: number) => {
+  const queryParams = limit ? `?limit=${limit}` : '';
+  const response = await apiRequest("GET", `/api/opportunities/top${queryParams}`);
+  return response.json();
+};
+
+export const analyzeOpportunity = async (opportunityId: number, affiliateProgramId?: number) => {
+  const queryParams = affiliateProgramId ? `?affiliateProgramId=${affiliateProgramId}` : '';
+  const response = await apiRequest("GET", `/api/opportunities/analyze/${opportunityId}${queryParams}`);
+  return response.json();
+};
+
+export const rankOpportunitiesForCampaign = async (campaignId: number, limit?: number) => {
+  const queryParams = limit ? `?limit=${limit}` : '';
+  const response = await apiRequest("GET", `/api/opportunities/rank/${campaignId}${queryParams}`);
+  return response.json();
+};
