@@ -1,0 +1,98 @@
+🧠 Purpose: Expand the Content Research Machine to support Reddit-based affiliate marketing at scale. This upgrade focuses on storing critical affiliate metadata and deeply mapping 200+ subreddits for content targeting, trend analysis, and engagement optimization.
+
+📦 FEATURE 1: AFFILIATE PROGRAM INTELLIGENCE
+Integrate a structured system to store affiliate program metadata for use in AI content generation.
+
+Each affiliate program must store the following fields:
+
+json
+Copy
+Edit
+{
+  "program_name": "Frase",
+  "affiliate_link": "https://affiliate.example.com/frase",
+  "promo_code": "AI20OFF",
+  "tags": ["AI", "Content Marketing", "SEO"]
+}
+🔁 These fields must be queryable by the content generator module, so that affiliate links and promo codes can be dynamically inserted into Reddit posts, comments, and promotional content.
+
+📥 All affiliate metadata will be imported via a separate CSV or JSON source.
+
+🌐 FEATURE 2: DEEP SUBREDDIT RESEARCH INTEGRATION
+You must integrate support for each of the following 200 subreddits. Your goal is to associate each subreddit with:
+
+🧩 Primary topics
+
+🧠 User intent (e.g., tool discovery, review seeking, comparison research)
+
+📌 Content format recommendations (e.g., question-answer, tutorial, listicle, “best X” posts)
+
+🚫 Posting & compliance rules (scraped via Reddit API or defined manually)
+
+📊 Engagement heuristics (e.g., avg upvotes, best post times)
+
+🔍 Keywords to monitor (for targeting intent like “best AI writer”, “referral automation”, “discount code for Notion AI”)
+
+Each subreddit should be stored with a schema like:
+
+json
+Copy
+Edit
+{
+  "subreddit": "r/ChatGPT",
+  "topics": ["ChatGPT", "Prompt Engineering", "LLMs"],
+  "user_intent": ["tool discovery", "prompt optimization"],
+  "content_formats": ["case study", "Q&A", "tool comparison"],
+  "rules": ["No self-promo unless approved", "Flair required"],
+  "posting_times": ["Tuesdays 9am EST", "Fridays 12pm EST"],
+  "high_value_keywords": ["best ChatGPT plugins", "alternatives to Jasper", "CustomGPT vs ChatGPT"]
+}
+🧭 Subreddit List to Include (All Must Be Indexed)
+Include and process all of the following subreddit categories:
+
+🔹 1. Core AI & ML
+r/artificial, r/MachineLearning, r/ChatGPT, r/deeplearning, r/AI_Agents, r/StableDiffusion, r/learnmachinelearning, r/MLQuestions, r/computervision, r/NaturalLanguageProcessing, r/OpenAI, r/LocalLLaMA, r/LanguageTechnology, r/gpt3, r/LLM, r/PromptEngineering, r/GenerativeAI, r/Generative_Art, r/Futurology, r/robotics
+
+🔹 2. SaaS, Startups, Micro-SaaS
+r/SaaS, r/microsaas, r/NoCodeSaaS, r/Startups, r/Entrepreneur, r/EntrepreneurRideAlong, r/SideProject, r/SideProjects, r/SaaSnews, r/SaaSstartups, r/GrowthHacking, r/growmybusiness, r/OnlineBusiness, r/SmallBusiness, r/BusinessHub, r/AlphaandBetaUsers, r/founders, r/SaaSFounders, r/bootstrapping, r/IndieBiz, r/TechStartups, r/IndieStartups, r/SmallBusinessTech, r/PreStartup, r/SaaS_marketing, r/SaaS_deals, r/SaaSjobs, r/SaaSgrowth, r/SaaSExperts, r/internetentrepreneurs
+
+🔹 3. No-Code, Low-Code & Automation
+r/NoCode, r/NoCodeDevelopment, r/NoCodeFounders, r/bubble, r/Webflow, r/automation, r/automate, r/lowcode, r/WeAreDevs, r/learnBubble
+
+🔹 4. Affiliate & Referral Marketing
+r/affiliatemarketing, r/affiliates, r/AffiliatePromotions, r/AffiliateMktg, r/AffiliateBusiness, r/ClickBank, r/beermoney, r/Referral, r/ReferralCodes, r/AffiliateCrossing
+
+🔹 5. Digital Marketing & SEO
+r/marketing, r/digital_marketing, r/marketingideas, r/MarketingManagement, r/GrowthHack, r/Branding, r/SEO, r/SEOGenius, r/SEOscience, r/Analytics, r/GoogleAnalytics, r/TechSEO, r/PPC, r/ppcmarketing, r/content_marketing, r/copywriting, r/CopywritingFeedback, r/ContentCreators, r/emailmarketing, r/SocialMediaMarketing
+
+🔹 6. Blogging, Writing, Content Creation
+r/Blogging, r/BlogExchange, r/writing, r/freelanceWriters, r/Wordpress, r/ProBlogging, r/Medium, r/ContentCreation, r/YouTubers, r/podcasting, r/Twitch, r/InstagramMarketing, r/TikTokGrowth, r/LinkedIn, r/patreon, r/Quora
+
+🔹 7. Productivity & Collaboration
+r/productivity, r/productivitytips, r/Notion, r/ObsidianMD, r/Trello, r/Slack, r/Airtable, r/ClickUp, r/asana, r/basecamp, r/focusmate, r/Office365
+
+🔹 8. Software Dev & Tech
+r/programming, r/software, r/webdev, r/Frontend, r/FullStack, r/devops, r/devopsish, r/aws, r/Azure, r/gcloud, r/coding, r/learnprogramming, r/SoftwareEngineering, r/cscareerquestions, r/java, r/python, r/javascript, r/reactjs, r/node, r/django, r/flask, r/Vue, r/angular, r/laravel, r/rust, r/golang, r/ruby, r/rubyOnRails
+
+🔹 9. Creative Tools & Content Gen
+r/photoshop, r/Adobe, r/adobeillustrator, r/graphic_design, r/design, r/UI_Design, r/UXDesign, r/VideoEditing, r/Videography, r/Filmmakers, r/AudioEditing, r/GIMP, r/premiere, r/AfterEffects, r/Lightroom, r/indesign
+
+🔹 10. Tech News & Communities
+r/technology, r/TechNewsToday, r/tech, r/Technews, r/InternetIsBeautiful, r/computers, r/techsupport, r/futuristparty
+
+🔹 11. Entrepreneurship, Freelancing, Business
+r/business, r/freelance, r/consulting, r/smallbusinessadvice, r/AdSense, r/Adwords, r/startup_ideas, r/ecommerce, r/dropship, r/dropshipping, r/Shopify, r/EtsySellers, r/SocialMedia, r/gigwork, r/Passive_Income, r/Money, r/ConsultingHub, r/bigbusiness, r/eBusiness, r/VirtualAssistants
+
+🔹 12. Additional Monetization Niches
+r/Influencer, r/AffiliateNetworks, r/OnlineAffiliate, r/CommissionJunction, r/ShareASale, r/offers, r/Coupons, r/DealHunters, r/PromoCodeShare, r/Networking
+
+✅ Final Output Summary
+The upgraded system should support:
+
+✅ Mapping of all 200 subreddits to topics, formats, compliance, and keywords
+
+✅ Affiliate program support with link and promo code injection logic
+
+✅ Intent-based content recommendations for Reddit posting
+
+✅ Scalable data storage schema for future analytics and scheduling

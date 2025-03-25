@@ -9,7 +9,9 @@ import {
   type User, type InsertUser,
   type Keyword, type InsertKeyword,
   type RedditOpportunity, type InsertRedditOpportunity,
-  type ContentQueueItem, type InsertContentQueueItem
+  type ContentQueueItem, type InsertContentQueueItem,
+  type SubredditCategory, type InsertSubredditCategory,
+  type SubredditCategoryMap, type InsertSubredditCategoryMap
 } from "@shared/schema";
 
 import { query, toCamelCase, toSnakeCase, initializeDatabase } from "./db";
@@ -105,6 +107,24 @@ export interface IStorage {
   updateContentQueueItem(id: number, item: Partial<InsertContentQueueItem>): Promise<ContentQueueItem | undefined>;
   deleteContentQueueItem(id: number): Promise<boolean>;
   getPendingContentQueueItems(): Promise<ContentQueueItem[]>;
+  
+  // Subreddit Categories
+  getSubredditCategories(): Promise<SubredditCategory[]>;
+  getSubredditCategory(id: number): Promise<SubredditCategory | undefined>;
+  getSubredditCategoryByName(name: string): Promise<SubredditCategory | undefined>;
+  createSubredditCategory(category: InsertSubredditCategory): Promise<SubredditCategory>;
+  updateSubredditCategory(id: number, category: Partial<InsertSubredditCategory>): Promise<SubredditCategory | undefined>;
+  deleteSubredditCategory(id: number): Promise<boolean>;
+  
+  // Subreddit Category Mappings
+  getSubredditCategoryMaps(): Promise<SubredditCategoryMap[]>;
+  getSubredditCategoryMapsBySubreddit(subredditId: number): Promise<SubredditCategoryMap[]>;
+  getSubredditCategoryMapsByCategory(categoryId: number): Promise<SubredditCategoryMap[]>;
+  getSubredditsByCategoryId(categoryId: number): Promise<Subreddit[]>;
+  getCategoriesBySubredditId(subredditId: number): Promise<SubredditCategory[]>;
+  createSubredditCategoryMap(mapping: InsertSubredditCategoryMap): Promise<SubredditCategoryMap>;
+  updateSubredditCategoryMap(id: number, mapping: Partial<InsertSubredditCategoryMap>): Promise<SubredditCategoryMap | undefined>;
+  deleteSubredditCategoryMap(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -119,6 +139,8 @@ export class MemStorage implements IStorage {
   private keywords: Map<number, Keyword>;
   private redditOpportunities: Map<number, RedditOpportunity>;
   private contentQueue: Map<number, ContentQueueItem>;
+  private subredditCategories: Map<number, SubredditCategory>;
+  private subredditCategoryMaps: Map<number, SubredditCategoryMap>;
 
   private currentIds: {
     affiliatePrograms: number;
@@ -132,6 +154,8 @@ export class MemStorage implements IStorage {
     keywords: number;
     redditOpportunities: number;
     contentQueue: number;
+    subredditCategories: number;
+    subredditCategoryMaps: number;
   };
 
   constructor() {
@@ -146,6 +170,8 @@ export class MemStorage implements IStorage {
     this.keywords = new Map();
     this.redditOpportunities = new Map();
     this.contentQueue = new Map();
+    this.subredditCategories = new Map();
+    this.subredditCategoryMaps = new Map();
 
     this.currentIds = {
       affiliatePrograms: 1,
@@ -159,6 +185,8 @@ export class MemStorage implements IStorage {
       keywords: 1,
       redditOpportunities: 1,
       contentQueue: 1,
+      subredditCategories: 1,
+      subredditCategoryMaps: 1,
     };
 
     // Initialize with some sample data

@@ -14,6 +14,13 @@ export const affiliatePrograms = pgTable("affiliate_programs", {
   payoutFrequency: text("payout_frequency"), // monthly, weekly, etc.
   category: text("category"), // SaaS, Finance, etc.
   active: boolean("active").default(true),
+  affiliateLink: text("affiliate_link"), // Main affiliate link for program
+  promoCode: text("promo_code"), // Promotion code for discounts
+  tags: text("tags").array(), // Tags for categorization and search
+  contentGuidelines: text("content_guidelines"), // Program's content guidelines
+  targetAudience: text("target_audience"), // Target audience demographics
+  promoMaterials: jsonb("promo_materials"), // URLs to promotional materials
+  competitorInfo: jsonb("competitor_info"), // Information about competitors
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -31,6 +38,17 @@ export const subreddits = pgTable("subreddits", {
   postingRules: text("posting_rules"),
   bestTimeToPost: text("best_time_to_post"),
   categoryTags: text("category_tags").array(),
+  primaryTopics: text("primary_topics").array(), // Main topics of the subreddit
+  userIntent: text("user_intent").array(), // User intent categories (tool discovery, review seeking, etc.)
+  contentFormats: text("content_formats").array(), // Recommended content formats
+  rules: text("rules").array(), // Posting and compliance rules
+  postingTimes: text("posting_times").array(), // Best posting times
+  highValueKeywords: text("high_value_keywords").array(), // Keywords to monitor
+  engagementMetrics: jsonb("engagement_metrics"), // Stores metrics like avg upvotes, comments, etc.
+  moderationLevel: text("moderation_level"), // How strictly moderated (high, medium, low)
+  audienceDemographics: jsonb("audience_demographics"), // Demographic info
+  competitiveAnalysis: jsonb("competitive_analysis"), // Analysis of top performing content
+  category: text("category"), // Category from the list of 12 categories
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -253,3 +271,39 @@ export type InsertRedditOpportunity = z.infer<typeof insertRedditOpportunitySche
 
 export type ContentQueueItem = typeof contentQueue.$inferSelect;
 export type InsertContentQueueItem = z.infer<typeof insertContentQueueSchema>;
+
+// Subreddit Categories
+export const subredditCategories = pgTable("subreddit_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(), // Category name (e.g., "Core AI & ML")
+  description: text("description"),
+  parentCategory: text("parent_category"), // For subcategories
+  subredditCount: integer("subreddit_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSubredditCategorySchema = createInsertSchema(subredditCategories).omit({
+  id: true,
+  createdAt: true,
+  subredditCount: true,
+});
+
+// Create a mapping table for many-to-many relationship between subreddits and categories
+export const subredditCategoryMap = pgTable("subreddit_category_map", {
+  id: serial("id").primaryKey(),
+  subredditId: integer("subreddit_id").notNull(),
+  categoryId: integer("category_id").notNull(),
+  relevanceScore: doublePrecision("relevance_score").default(1.0), // How relevant the subreddit is to this category
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSubredditCategoryMapSchema = createInsertSchema(subredditCategoryMap).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type SubredditCategory = typeof subredditCategories.$inferSelect;
+export type InsertSubredditCategory = z.infer<typeof insertSubredditCategorySchema>;
+
+export type SubredditCategoryMap = typeof subredditCategoryMap.$inferSelect;
+export type InsertSubredditCategoryMap = z.infer<typeof insertSubredditCategoryMapSchema>;

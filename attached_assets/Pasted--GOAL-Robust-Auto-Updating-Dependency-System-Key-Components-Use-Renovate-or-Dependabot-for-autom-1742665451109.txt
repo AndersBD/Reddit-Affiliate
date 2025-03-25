@@ -1,0 +1,136 @@
+✅ GOAL: Robust, Auto-Updating Dependency System
+Key Components:
+Use Renovate or Dependabot for automatic PRs when deps get updated
+
+Run dependency resolution checks weekly
+
+Fail loudly if peer conflicts arise
+
+Auto-commit package-lock.json updates from GitHub Actions (optional advanced)
+
+Pin or range-match dependencies properly
+
+🧱 IMPLEMENTATION STRATEGY
+✅ Step 1: Add GitHub Actions CI with Two Modes
+Update .github/workflows/ci.yml:
+
+yaml
+Copy
+Edit
+name: Build and Dependency Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 6 * * 1'  # Every Monday at 6 AM UTC
+
+jobs:
+  install-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies (prefer clean resolution)
+        run: |
+          if npm ci; then
+            echo "Installed cleanly."
+          else
+            echo "Conflicts detected — falling back to legacy peer deps..."
+            npm ci --legacy-peer-deps
+          fi
+
+      - name: Run tests
+        run: npm run test
+✅ Step 2: Add Renovate or Dependabot
+Option A: Renovate (more powerful)
+Create renovate.json in root:
+
+json
+Copy
+Edit
+{
+  "extends": ["config:recommended"],
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["vitest"],
+      "allowedVersions": "<1.0.0"
+    }
+  ]
+}
+Then install Renovate on your GitHub repo via https://github.com/apps/renovate
+
+Option B: GitHub Dependabot (built-in)
+Create .github/dependabot.yml:
+
+yaml
+Copy
+Edit
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "vitest"
+        versions: [">=1.0.0"]
+✅ Step 3: Lock Dependency Ranges in package.json
+Update your devDependencies to something like:
+
+json
+Copy
+Edit
+{
+  "vitest": "^0.34.6",
+  "@vitest/coverage-c8": "^0.33.0"
+}
+Add a comment in your README.md:
+
+⚠️ Vitest v3.x is not compatible with @vitest/coverage-c8 as of March 2025. Locked to <1.0.0.
+
+✅ Step 4 (Optional Advanced): Auto-fix Conflicts via GitHub Action
+Create a separate workflow .github/workflows/fix-peer-deps.yml:
+
+yaml
+Copy
+Edit
+name: Auto Fix Peer Dependency Conflicts
+
+on:
+  schedule:
+    - cron: '0 4 * * 1' # Every Monday
+
+jobs:
+  autofix-peer-deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Auto-fix peer conflicts
+        run: |
+          npm install --legacy-peer-deps
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "chore: auto-fix peer dependency conflicts [bot]" || echo "No changes to commit"
+          git push
+✅ Summary
+Feature	Implemented?
+Smart fallback to --legacy-peer-deps	✅
+Weekly scheduled check	✅
+Auto-update dependencies (Renovate / Dependabot)	✅
+Optional: auto-push updated lockfile	✅
+Peer version pinning	✅
