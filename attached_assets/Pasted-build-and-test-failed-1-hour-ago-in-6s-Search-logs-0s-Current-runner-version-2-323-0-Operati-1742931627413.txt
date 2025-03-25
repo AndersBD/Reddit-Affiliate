@@ -1,0 +1,74 @@
+build-and-test
+failed 1 hour ago in 6s
+Search logs
+0s
+Current runner version: '2.323.0'
+Operating System
+Runner Image
+Runner Image Provisioner
+GITHUB_TOKEN Permissions
+Secret source: Actions
+Prepare workflow directory
+Prepare all required actions
+Getting action download info
+Download action repository 'actions/checkout@v3' (SHA:f43a0e5ff2bd294095638e18286ca9a3d1956744)
+Download action repository 'actions/setup-node@v3' (SHA:1a4442cacd436585916779262731d5b162bc6ec7)
+Complete job name: build-and-test
+1s
+Run actions/checkout@v3
+Syncing repository: AndersBD/Reddit-Affiliate
+Getting Git version info
+Temporarily overriding HOME='/home/runner/work/_temp/8043c126-2262-43a6-b0eb-7a94fbde8b53' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+/usr/bin/git config --global --add safe.directory /home/runner/work/Reddit-Affiliate/Reddit-Affiliate
+Deleting the contents of '/home/runner/work/Reddit-Affiliate/Reddit-Affiliate'
+Initializing the repository
+Disabling automatic garbage collection
+Setting up auth
+Fetching the repository
+Determining the checkout info
+Checking out the ref
+/usr/bin/git log -1 --format='%H'
+'f640efe32332534f915dc896392ee2142eddf914'
+1s
+Run actions/setup-node@v3
+Found in cache @ /opt/hostedtoolcache/node/20.19.0/x64
+Environment details
+/opt/hostedtoolcache/node/20.19.0/x64/bin/npm config get cache
+/home/runner/.npm
+npm cache is not found
+2s
+Run npm ci
+npm error code ERESOLVE
+npm error ERESOLVE could not resolve
+npm error
+npm error While resolving: @vitest/coverage-c8@0.33.0
+npm error Found: vitest@3.0.9
+npm error node_modules/vitest
+npm error   vitest@"^3.0.9" from the root project
+npm error
+npm error Could not resolve dependency:
+npm error peer vitest@">=0.30.0 <1" from @vitest/coverage-c8@0.33.0
+npm error node_modules/@vitest/coverage-c8
+npm error   @vitest/coverage-c8@"^0.33.0" from the root project
+npm error
+npm error Conflicting peer dependency: vitest@0.34.6
+npm error node_modules/vitest
+npm error   peer vitest@">=0.30.0 <1" from @vitest/coverage-c8@0.33.0
+npm error   node_modules/@vitest/coverage-c8
+npm error     @vitest/coverage-c8@"^0.33.0" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error /home/runner/.npm/_logs/2025-03-25T18_41_47_522Z-eresolve-report.txt
+npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2025-03-25T18_41_47_522Z-debug-0.log
+Error: Process completed with exit code 1.
+0s
+0s
+0s
+0s
+0s

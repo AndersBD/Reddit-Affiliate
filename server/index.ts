@@ -78,32 +78,16 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Use centralized port configuration with fallback
+  // Use centralized port configuration from config.ts (5000)
   // This serves both the API and the client
-  const fallbackPort = 5000;
-  let port = PORT;
-  
-  // Try to listen on configured port, fall back to alternative if that fails
   server.listen({
-    port,
+    port: PORT,
     host: "0.0.0.0",
   }).on('error', (err: any) => {
-    if (err.code === 'EADDRINUSE') {
-      // Port is in use, try the fallback port
-      log(`Port ${port} is in use, trying fallback port ${fallbackPort}`);
-      port = fallbackPort;
-      server.listen({
-        port,
-        host: "0.0.0.0",
-      }, () => {
-        log(`serving on fallback port ${port}`);
-      });
-    } else {
-      // Some other error
-      log(`Server failed to start: ${err.message}`);
-      throw err;
-    }
+    // Some error occurred
+    log(`Server failed to start: ${err.message}`);
+    throw err;
   }).on('listening', () => {
-    log(`serving on port ${port}`);
+    log(`serving on port ${PORT}`);
   });
 })();

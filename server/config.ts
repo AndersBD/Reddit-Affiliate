@@ -1,7 +1,8 @@
 // Configuration settings for the application
 
 // Port configuration
-export const PORT = process.env.PORT || 3000;
+// Note: Replit workflow expects port 5000 for web view
+export const PORT = process.env.PORT || 5000;
 
 // Database configuration
 export const DATABASE_CONFIG = {
