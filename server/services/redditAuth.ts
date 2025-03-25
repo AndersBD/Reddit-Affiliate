@@ -1,16 +1,4 @@
-/**
- * Reddit OAuth Authentication Service
- */
-
-// Reddit OAuth Configuration - Replace with your actual credentials
-const REDDIT_CLIENT_ID = process.env.REDDIT_CLIENT_ID || '';
-const REDDIT_CLIENT_SECRET = process.env.REDDIT_CLIENT_SECRET || '';
-const REDDIT_REDIRECT_URI = process.env.REDDIT_REDIRECT_URI || 'http://localhost:5000/api/auth/reddit/callback';
-const REDDIT_OAUTH_URL = 'https://www.reddit.com/api/v1/authorize';
-const REDDIT_TOKEN_URL = 'https://www.reddit.com/api/v1/access_token';
-
-// Required permissions scope
-const REDDIT_SCOPE = 'identity read submit';
+import { REDDIT_CONFIG } from '../config';
 
 interface TokenInfo {
   accessToken: string;
@@ -19,59 +7,68 @@ interface TokenInfo {
   scope: string;
 }
 
+// In-memory storage for tokens (would be replaced with database storage in production)
+let currentToken: TokenInfo | null = null;
+
 /**
  * Generates a Reddit authorization URL for user consent
  */
 export function getAuthorizationUrl(state: string): string {
+  const { clientId, redirectUri } = REDDIT_CONFIG;
+  
   const params = new URLSearchParams({
-    client_id: REDDIT_CLIENT_ID,
+    client_id: clientId,
     response_type: 'code',
     state,
-    redirect_uri: REDDIT_REDIRECT_URI,
+    redirect_uri: redirectUri,
     duration: 'permanent',
-    scope: REDDIT_SCOPE
+    scope: 'read submit identity'
   });
-
-  return `${REDDIT_OAUTH_URL}?${params.toString()}`;
+  
+  return `https://www.reddit.com/api/v1/authorize?${params.toString()}`;
 }
 
 /**
  * Exchanges an authorization code for an access token
  */
 export async function exchangeCodeForToken(code: string): Promise<TokenInfo> {
-  // Reddit requires Basic Auth for this endpoint using client_id:client_secret
-  const authString = Buffer.from(`${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}`).toString('base64');
+  const { clientId, clientSecret, redirectUri } = REDDIT_CONFIG;
   
-  const response = await fetch(REDDIT_TOKEN_URL, {
+  const params = new URLSearchParams({
+    grant_type: 'authorization_code',
+    code,
+    redirect_uri: redirectUri
+  });
+  
+  const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+  
+  const response = await fetch('https://www.reddit.com/api/v1/access_token', {
     method: 'POST',
     headers: {
-      'Authorization': `Basic ${authString}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Authorization': `Basic ${authHeader}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'User-Agent': REDDIT_CONFIG.userAgent
     },
-    body: new URLSearchParams({
-      grant_type: 'authorization_code',
-      code,
-      redirect_uri: REDDIT_REDIRECT_URI
-    }).toString()
+    body: params.toString()
   });
-
+  
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(`Token exchange failed: ${errorData.error || response.statusText}`);
+    const error = await response.text();
+    throw new Error(`Failed to exchange code for token: ${error}`);
   }
-
+  
   const data = await response.json();
   
-  // Calculate when the token will expire
-  const expiresAt = Math.floor(Date.now() / 1000) + data.expires_in;
-
   const tokenInfo: TokenInfo = {
     accessToken: data.access_token,
     refreshToken: data.refresh_token,
-    expiresAt,
+    expiresAt: Date.now() + (data.expires_in * 1000),
     scope: data.scope
   };
-
+  
+  // Store the token
+  currentToken = tokenInfo;
+  
   return tokenInfo;
 }
 
@@ -79,37 +76,42 @@ export async function exchangeCodeForToken(code: string): Promise<TokenInfo> {
  * Refreshes an access token using a refresh token
  */
 export async function refreshAccessToken(refreshToken: string): Promise<TokenInfo> {
-  const authString = Buffer.from(`${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}`).toString('base64');
+  const { clientId, clientSecret } = REDDIT_CONFIG;
   
-  const response = await fetch(REDDIT_TOKEN_URL, {
+  const params = new URLSearchParams({
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken
+  });
+  
+  const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+  
+  const response = await fetch('https://www.reddit.com/api/v1/access_token', {
     method: 'POST',
     headers: {
-      'Authorization': `Basic ${authString}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Authorization': `Basic ${authHeader}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'User-Agent': REDDIT_CONFIG.userAgent
     },
-    body: new URLSearchParams({
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken
-    }).toString()
+    body: params.toString()
   });
-
+  
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(`Token refresh failed: ${errorData.error || response.statusText}`);
+    const error = await response.text();
+    throw new Error(`Failed to refresh token: ${error}`);
   }
-
+  
   const data = await response.json();
   
-  // Calculate when the token will expire
-  const expiresAt = Math.floor(Date.now() / 1000) + data.expires_in;
-
   const tokenInfo: TokenInfo = {
     accessToken: data.access_token,
-    refreshToken: refreshToken, // Use the same refresh token
-    expiresAt,
+    refreshToken: refreshToken, // Keep the same refresh token
+    expiresAt: Date.now() + (data.expires_in * 1000),
     scope: data.scope
   };
-
+  
+  // Update the stored token
+  currentToken = tokenInfo;
+  
   return tokenInfo;
 }
 
@@ -117,10 +119,54 @@ export async function refreshAccessToken(refreshToken: string): Promise<TokenInf
  * Get access token, refreshing if necessary
  */
 export async function getAccessToken(): Promise<string> {
-  // This is just a placeholder. In a real implementation, you'd retrieve the token from your database or session
-  // and check if it's expired. If it is, you'd refresh it.
-  // For now, we'll assume we have a valid token from the session.
-  throw new Error('Not implemented - token should be retrieved from session');
+  // If we don't have a token or refresh token, use application-only auth
+  if (!currentToken || !currentToken.refreshToken) {
+    const { clientId, clientSecret } = REDDIT_CONFIG;
+    
+    const params = new URLSearchParams({
+      grant_type: 'client_credentials'
+    });
+    
+    const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    
+    try {
+      const response = await fetch('https://www.reddit.com/api/v1/access_token', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${authHeader}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': REDDIT_CONFIG.userAgent
+        },
+        body: params.toString()
+      });
+      
+      if (!response.ok) {
+        console.error(`Failed to get application-only token: ${response.status} ${response.statusText}`);
+        return '';
+      }
+      
+      const data = await response.json();
+      
+      return data.access_token;
+    } catch (error) {
+      console.error('Error getting application-only token:', error);
+      return '';
+    }
+  }
+  
+  // Check if token needs refreshing
+  if (Date.now() >= currentToken.expiresAt - 60000) { // Refresh if less than 1 minute remaining
+    try {
+      const refreshedToken = await refreshAccessToken(currentToken.refreshToken);
+      return refreshedToken.accessToken;
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      return '';
+    }
+  }
+  
+  // Return existing token
+  return currentToken.accessToken;
 }
 
 /**
@@ -128,37 +174,36 @@ export async function getAccessToken(): Promise<string> {
  */
 export async function redditApiRequest(
   endpoint: string,
-  accessToken: string,
-  method: 'GET' | 'POST' = 'GET',
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
   body?: any
 ): Promise<any> {
+  const accessToken = await getAccessToken();
+  
+  if (!accessToken) {
+    throw new Error('Failed to get Reddit access token');
+  }
+  
   const headers: HeadersInit = {
     'Authorization': `Bearer ${accessToken}`,
-    'User-Agent': 'AffiliateMarketingAutomation/1.0'
+    'User-Agent': REDDIT_CONFIG.userAgent,
+    'Content-Type': 'application/json'
   };
-
+  
   const options: RequestInit = {
     method,
     headers
   };
-
-  if (body && method === 'POST') {
-    headers['Content-Type'] = 'application/json';
+  
+  if (body && (method === 'POST' || method === 'PUT')) {
     options.body = JSON.stringify(body);
   }
-
+  
   const response = await fetch(`https://oauth.reddit.com${endpoint}`, options);
-
+  
   if (!response.ok) {
-    let errorText: string;
-    try {
-      const errorData = await response.json();
-      errorText = errorData.error || errorData.message || response.statusText;
-    } catch (e) {
-      errorText = response.statusText;
-    }
-    throw new Error(`Reddit API request failed: ${errorText}`);
+    const errorText = await response.text();
+    throw new Error(`Reddit API error (${response.status}): ${errorText}`);
   }
-
+  
   return response.json();
 }

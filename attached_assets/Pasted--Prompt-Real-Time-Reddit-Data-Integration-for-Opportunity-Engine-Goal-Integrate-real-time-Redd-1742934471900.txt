@@ -1,0 +1,80 @@
+✅ Prompt: Real-Time Reddit Data Integration for Opportunity Engine
+🧠 Goal: Integrate real-time Reddit data into the opportunity analysis pipeline so that the platform continually discovers fresh threads across our mapped subreddits and evaluates them in near real-time.
+
+🔧 Scope:
+Implement a system that fetches live Reddit threads via the Reddit API and pipes them into the opportunity analyzer for scoring and affiliate matching.
+
+🧱 Functional Requirements:
+1. Live Thread Fetcher
+Use Reddit’s official API (via OAuth2) to:
+
+Pull new or hot threads from each subreddit listed in our SubredditCategoryMap.
+
+Support configurable parameters:
+
+Number of threads (default: 50 per subreddit)
+
+Sort mode (e.g., new, hot, top)
+
+Store results with:
+
+ts
+Copy
+Edit
+{
+  id: string,
+  subreddit: string,
+  title: string,
+  body: string,
+  author: string,
+  flair: string | null,
+  upvotes: number,
+  comments: number,
+  created_utc: number
+}
+2. Thread Enrichment & Processing
+For each thread:
+
+Run it through the existing intent classification system (DISCOVERY, COMPARISON, etc.)
+
+Score it via the opportunity analyzer
+
+Match it with affiliate programs based on keyword relevance and tags
+
+3. Real-Time Insertion into Opportunity Table
+Store enriched results in the Opportunities table
+
+Include:
+
+Matched affiliate programs (with link + promo_code)
+
+Suggested action (comment, create_post, monitor)
+
+Thread intent + confidence score
+
+4. Scheduled or On-Demand Execution
+Allow this fetch+analyze process to run:
+
+On-demand via API endpoint (/api/fetch-opportunities)
+
+On schedule (e.g., every 6 hours via CRON job)
+
+🖥 API Endpoint Example
+POST /api/fetch-opportunities
+
+json
+Copy
+Edit
+{
+  "subreddits": ["r/ChatGPT", "r/Blogging", "r/SEO"],
+  "mode": "hot",
+  "limit": 25
+}
+Response should return opportunity results ready for rendering in the frontend.
+
+🧪 Optional (Advanced for Later):
+Store Reddit post ID to avoid duplicate analysis
+
+Allow filtering by min_upvotes or flair
+
+Expand to include Pushshift.io for historical data later

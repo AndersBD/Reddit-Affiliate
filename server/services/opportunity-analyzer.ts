@@ -202,7 +202,7 @@ export async function findTemplatesForOpportunity(
 /**
  * Determine thread intent from title and snippet
  */
-function determineThreadIntent(title: string, snippet: string): ThreadIntent {
+export function determineThreadIntent(title: string, snippet: string): ThreadIntent {
   const contentLower = (title + ' ' + snippet).toLowerCase();
   
   // Question pattern detection
