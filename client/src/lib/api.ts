@@ -265,3 +265,54 @@ export const analyzeOpportunities = async (campaignId: number, limit?: number) =
   const response = await apiRequest("POST", "/api/analyze-opportunities", data);
   return response.json();
 };
+
+// Reddit Crawler API
+export interface CrawlerOpportunity {
+  thread_id: string;
+  title: string;
+  body: string;
+  subreddit: string;
+  url: string;
+  upvotes: number;
+  comments: number;
+  created_utc: string;
+  fetched_at: string;
+  intent: string;
+  affiliate_matches: Array<{
+    keyword: string;
+    program_name: string;
+    program_id: number;
+    match_strength: number;
+  }>;
+  opportunity_score: number;
+  action_type: 'comment' | 'post';
+  priority: 'high' | 'medium' | 'low';
+  status: 'new' | 'queued' | 'processed' | 'ignored';
+  processed_at: string;
+}
+
+export const getCrawlerStatus = async () => {
+  const response = await apiRequest("GET", "/api/crawler/status");
+  return response.json();
+};
+
+export const getCrawlerOpportunities = async (limit?: number) => {
+  const queryParams = limit ? `?limit=${limit}` : '';
+  const response = await apiRequest("GET", `/api/crawler/opportunities${queryParams}`);
+  return response.json() as Promise<CrawlerOpportunity[]>;
+};
+
+export const runCrawler = async (force: boolean = false, subreddits: string[] = []) => {
+  const response = await apiRequest("POST", "/api/crawler/run", { force, subreddits });
+  return response.json();
+};
+
+export const updateCrawlerOpportunityStatus = async (threadId: string, status: 'new' | 'queued' | 'processed' | 'ignored') => {
+  const response = await apiRequest("PATCH", `/api/crawler/opportunity/${threadId}`, { status });
+  return response.json();
+};
+
+export const importCrawlerOpportunity = async (opportunity: CrawlerOpportunity) => {
+  const response = await apiRequest("POST", "/api/crawler/import", { opportunity });
+  return response.json();
+};

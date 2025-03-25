@@ -1,0 +1,2 @@
+[2025-03-25 21:28:51] Starting Reddit opportunity crawler
+[2025-03-25 21:28:51] Scraping 10 subreddits: SaaS, Blogging, SEO, contentmarketing, marketing, startups, SmallBusiness, Entrepreneur, webdev, programming

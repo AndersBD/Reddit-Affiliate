@@ -8,7 +8,12 @@
 import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { InsertRedditOpportunity } from '@shared/schema';
+
+// Get the directory name in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Constants
 const DATA_DIR = path.join(__dirname, '..', '..', 'crawler', 'data');
@@ -189,9 +194,12 @@ export function convertToDbOpportunity(opportunity: CrawlerOpportunity): InsertR
   const firstMatch = opportunity.affiliate_matches[0];
   const keywordId = firstMatch ? firstMatch.program_id : 1; // Default to 1 if no match
   
-  return {
+  // Create opportunity object
+  const dbOpportunity: InsertRedditOpportunity = {
     keywordId,
+    keyword: firstMatch?.keyword || 'general',
     url: opportunity.url,
+    redditPostUrl: opportunity.url,
     title: opportunity.title,
     snippet: opportunity.body || '',
     subreddit: opportunity.subreddit,
@@ -199,13 +207,12 @@ export function convertToDbOpportunity(opportunity: CrawlerOpportunity): InsertR
     opportunityScore: opportunity.opportunity_score,
     status: 'new',
     priority: opportunity.priority,
-    intent: opportunity.intent,
     upvotes: opportunity.upvotes,
-    commentCount: opportunity.comments,
     postDate: new Date(opportunity.created_utc || Date.now()),
-    sourceType: 'crawler',
-    affiliateMatches: opportunity.affiliate_matches.map(match => match.program_name).join(', ')
+    affiliateProgramId: firstMatch ? firstMatch.program_id : null
   };
+
+  return dbOpportunity;
 }
 
 /**

@@ -16,6 +16,14 @@ import { searchRedditOpportunities, batchProcessKeywords, scoreAndQueueOpportuni
 import { triggerOpportunityProcessing, initializeOpportunityScheduler, triggerKeywordScan, triggerOpportunityScoring } from "./services/opportunity-scheduler";
 import { initializeCategories, categorizeSubreddit, categorizeAllSubreddits, getSubredditsByCategory, findRelevantSubredditsForProgram } from "./services/subreddit-categorizer";
 import { analyzeOpportunity, rankOpportunitiesForCampaign, findTemplatesForOpportunity } from "./services/opportunity-analyzer";
+import { 
+  getCrawlerOpportunities, 
+  runCrawler,
+  getCrawlerStatus,
+  updateOpportunityStatus,
+  convertToDbOpportunity,
+  initializeCrawlerIntegration
+} from "./services/crawler-integration";
 import { z } from "zod";
 import { 
   insertAffiliateProgramSchema, 
@@ -33,6 +41,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize the scheduler
   initializeScheduler().catch(err => {
     console.error("Error initializing scheduler:", err);
+  });
+  
+  // Initialize the crawler integration
+  initializeCrawlerIntegration().catch(err => {
+    console.error("Error initializing crawler integration:", err);
   });
 
   // API Routes
@@ -546,6 +559,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error in complete content pipeline:", error);
       res.status(500).json({ message: "Error in complete content pipeline" });
+    }
+  });
+
+  // Reddit Crawler Routes
+  apiRouter.get("/crawler/status", async (req, res) => {
+    try {
+      const status = await getCrawlerStatus();
+      res.json(status);
+    } catch (error) {
+      console.error("Error getting crawler status:", error);
+      res.status(500).json({ message: "Error getting crawler status" });
+    }
+  });
+
+  apiRouter.get("/crawler/opportunities", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const opportunities = await getCrawlerOpportunities(limit);
+      res.json(opportunities);
+    } catch (error) {
+      console.error("Error getting crawler opportunities:", error);
+      res.status(500).json({ message: "Error getting crawler opportunities" });
+    }
+  });
+
+  apiRouter.post("/crawler/run", async (req, res) => {
+    try {
+      const { force = false, subreddits = [] } = req.body;
+      
+      // Start the crawler in the background
+      runCrawler(force, subreddits)
+        .then(success => {
+          console.log(`Crawler finished with status: ${success ? 'success' : 'failed'}`);
+        })
+        .catch(err => {
+          console.error("Error in crawler background task:", err);
+        });
+      
+      res.json({ message: "Crawler started in background" });
+    } catch (error) {
+      console.error("Error starting crawler:", error);
+      res.status(500).json({ message: "Error starting crawler" });
+    }
+  });
+
+  apiRouter.patch("/crawler/opportunity/:thread_id", async (req, res) => {
+    try {
+      const { thread_id } = req.params;
+      const { status } = req.body;
+      
+      if (!thread_id || !status) {
+        return res.status(400).json({ message: "Missing thread_id or status" });
+      }
+      
+      const success = await updateOpportunityStatus(thread_id, status);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Opportunity not found" });
+      }
+      
+      res.json({ message: "Opportunity status updated" });
+    } catch (error) {
+      console.error("Error updating opportunity status:", error);
+      res.status(500).json({ message: "Error updating opportunity status" });
+    }
+  });
+
+  apiRouter.post("/crawler/import", async (req, res) => {
+    try {
+      const { opportunity } = req.body;
+      
+      if (!opportunity) {
+        return res.status(400).json({ message: "Missing opportunity data" });
+      }
+      
+      // Convert the crawler opportunity to the DB schema
+      const dbOpportunity = convertToDbOpportunity(opportunity);
+      
+      // Save to the database
+      const savedOpportunity = await storage.createRedditOpportunity(dbOpportunity);
+      
+      res.status(201).json(savedOpportunity);
+    } catch (error) {
+      console.error("Error importing opportunity:", error);
+      res.status(500).json({ message: "Error importing opportunity" });
     }
   });
 
