@@ -48,6 +48,8 @@ import {
   createKeyword,
   deleteKeyword,
   updateOpportunity,
+  fetchLiveOpportunities,
+  analyzeOpportunities,
   triggerOpportunityScan,
   createContentQueueItem, 
   schedulePost 

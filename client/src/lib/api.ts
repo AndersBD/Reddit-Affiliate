@@ -233,3 +233,21 @@ export const rankOpportunitiesForCampaign = async (campaignId: number, limit?: n
   const response = await apiRequest("GET", `/api/opportunities/rank/${campaignId}${queryParams}`);
   return response.json();
 };
+
+// Real-time Reddit Opportunity Fetching
+export interface FetchOpportunitiesOptions {
+  subreddits?: string[];
+  mode?: 'new' | 'hot' | 'top' | 'rising';
+  limit?: number;
+}
+
+export const fetchLiveOpportunities = async (options: FetchOpportunitiesOptions = {}) => {
+  const response = await apiRequest("POST", "/api/fetch-opportunities", options);
+  return response.json();
+};
+
+export const analyzeOpportunities = async (campaignId: number, limit?: number) => {
+  const data = { campaignId, limit };
+  const response = await apiRequest("POST", "/api/analyze-opportunities", data);
+  return response.json();
+};
