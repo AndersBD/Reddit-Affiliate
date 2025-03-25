@@ -60,7 +60,7 @@ app.use((req, res, next) => {
   } catch (error) {
     log(`Error initializing database: ${error}`, 'error');
   }
-  
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -80,10 +80,10 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Try to serve the app on port 5000, but fall back to 3000 if unavailable
+  // Try to serve the app on port 3000, but fall back to 5000 if unavailable
   // This serves both the API and the client.
-  const preferredPort = process.env.NODE_ENV === 'production' ? 5000 : (process.env.PORT || 5000);
-  const fallbackPort = 3000;
+  const preferredPort = process.env.NODE_ENV === 'production' ? 3000 : (process.env.PORT || 3000);
+  const fallbackPort = 5000;
   let port = preferredPort;
   // Try to listen on preferred port, fall back to alternative if that fails
   server.listen({
