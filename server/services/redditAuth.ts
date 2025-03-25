@@ -1,4 +1,4 @@
-import { REDDIT_CONFIG } from '../config';
+import { REDDIT_CONFIG, getRedditConfig } from '../config';
 
 interface TokenInfo {
   accessToken: string;
@@ -11,13 +11,27 @@ interface TokenInfo {
 let currentToken: TokenInfo | null = null;
 
 /**
+ * Determines if all required Reddit credentials are available
+ */
+export function hasRedditCredentials(): boolean {
+  const config = getRedditConfig();
+  return !!(config.clientId && config.clientSecret && config.redirectUri);
+}
+
+/**
  * Generates a Reddit authorization URL for user consent
  */
 export function getAuthorizationUrl(state: string): string {
-  const { clientId, redirectUri } = REDDIT_CONFIG;
+  // Get fresh config in case credentials were updated
+  const config = getRedditConfig();
+  const { clientId, redirectUri } = config;
+  
+  if (!clientId || !redirectUri) {
+    throw new Error("Missing Reddit API credentials");
+  }
   
   const params = new URLSearchParams();
-  params.append('client_id', clientId || '');
+  params.append('client_id', clientId);
   params.append('response_type', 'code');
   params.append('state', state);
   params.append('redirect_uri', redirectUri);
@@ -31,14 +45,20 @@ export function getAuthorizationUrl(state: string): string {
  * Exchanges an authorization code for an access token
  */
 export async function exchangeCodeForToken(code: string): Promise<TokenInfo> {
-  const { clientId, clientSecret, redirectUri } = REDDIT_CONFIG;
+  // Get fresh config in case credentials were updated
+  const config = getRedditConfig();
+  const { clientId, clientSecret, redirectUri } = config;
+  
+  if (!clientId || !clientSecret || !redirectUri) {
+    throw new Error("Missing Reddit API credentials");
+  }
   
   const params = new URLSearchParams();
   params.append('grant_type', 'authorization_code');
   params.append('code', code);
   params.append('redirect_uri', redirectUri);
   
-  const authHeader = Buffer.from(`${clientId || ''}:${clientSecret || ''}`).toString('base64');
+  const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
   
   const response = await fetch('https://www.reddit.com/api/v1/access_token', {
     method: 'POST',
@@ -74,20 +94,26 @@ export async function exchangeCodeForToken(code: string): Promise<TokenInfo> {
  * Refreshes an access token using a refresh token
  */
 export async function refreshAccessToken(refreshToken: string): Promise<TokenInfo> {
-  const { clientId, clientSecret } = REDDIT_CONFIG;
+  // Get fresh config in case credentials were updated
+  const config = getRedditConfig();
+  const { clientId, clientSecret } = config;
+  
+  if (!clientId || !clientSecret) {
+    throw new Error("Missing Reddit API credentials");
+  }
   
   const params = new URLSearchParams();
   params.append('grant_type', 'refresh_token');
   params.append('refresh_token', refreshToken);
   
-  const authHeader = Buffer.from(`${clientId || ''}:${clientSecret || ''}`).toString('base64');
+  const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
   
   const response = await fetch('https://www.reddit.com/api/v1/access_token', {
     method: 'POST',
     headers: {
       'Authorization': `Basic ${authHeader}`,
       'Content-Type': 'application/x-www-form-urlencoded',
-      'User-Agent': REDDIT_CONFIG.userAgent
+      'User-Agent': config.userAgent
     },
     body: params.toString()
   });
@@ -118,12 +144,20 @@ export async function refreshAccessToken(refreshToken: string): Promise<TokenInf
 export async function getAccessToken(): Promise<string> {
   // If we don't have a token or refresh token, use application-only auth
   if (!currentToken || !currentToken.refreshToken) {
-    const { clientId, clientSecret } = REDDIT_CONFIG;
+    // Get fresh config in case credentials were updated
+    const config = getRedditConfig();
+    const { clientId, clientSecret } = config;
+    
+    // Check if we have the necessary credentials
+    if (!clientId || !clientSecret) {
+      console.error("Missing Reddit API credentials for application-only auth");
+      return '';
+    }
     
     const params = new URLSearchParams();
     params.append('grant_type', 'client_credentials');
     
-    const authHeader = Buffer.from(`${clientId || ''}:${clientSecret || ''}`).toString('base64');
+    const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
     
     try {
       const response = await fetch('https://www.reddit.com/api/v1/access_token', {
@@ -131,7 +165,7 @@ export async function getAccessToken(): Promise<string> {
         headers: {
           'Authorization': `Basic ${authHeader}`,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': REDDIT_CONFIG.userAgent
+          'User-Agent': config.userAgent
         },
         body: params.toString()
       });
@@ -179,9 +213,12 @@ export async function redditApiRequest(
     throw new Error('Failed to get Reddit access token');
   }
   
+  // Get fresh config in case credentials were updated
+  const config = getRedditConfig();
+  
   const headers: HeadersInit = {
     'Authorization': `Bearer ${accessToken}`,
-    'User-Agent': REDDIT_CONFIG.userAgent,
+    'User-Agent': config.userAgent,
     'Content-Type': 'application/json'
   };
   

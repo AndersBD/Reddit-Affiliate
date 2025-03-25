@@ -11,13 +11,15 @@ export const DATABASE_CONFIG = {
 };
 
 // Reddit API configuration
-export const REDDIT_CONFIG = {
+export const getRedditConfig = () => ({
   clientId: process.env.REDDIT_CLIENT_ID,
   clientSecret: process.env.REDDIT_CLIENT_SECRET,
   redirectUri: process.env.REDDIT_REDIRECT_URI || `http://localhost:${PORT}/api/auth/reddit/callback`,
   userAgent: 'web:affiliate-automation:v1.0 (by /u/YourUsername)',
   scope: ['identity', 'submit', 'read', 'edit']
-};
+});
+
+export const REDDIT_CONFIG = getRedditConfig();
 
 // OpenAI API configuration
 export const OPENAI_CONFIG = {

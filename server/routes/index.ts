@@ -147,4 +147,63 @@ router.post("/api/auth/reddit/disconnect", (req: Request, res: Response) => {
   }
 });
 
+/**
+ * Route to save Reddit API credentials
+ */
+router.post("/api/auth/reddit/credentials", (req: Request, res: Response) => {
+  try {
+    const { clientId, clientSecret, redirectUri } = req.body;
+    
+    // Validate required fields
+    if (!clientId || !clientSecret || !redirectUri) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Missing required credentials (clientId, clientSecret, or redirectUri)" 
+      });
+    }
+    
+    // In a production environment, these would be stored securely
+    // For development, we're storing them in environment variables
+    process.env.REDDIT_CLIENT_ID = clientId;
+    process.env.REDDIT_CLIENT_SECRET = clientSecret;
+    process.env.REDDIT_REDIRECT_URI = redirectUri;
+    
+    console.log("Reddit API credentials saved successfully");
+    
+    res.json({ 
+      success: true, 
+      message: "Reddit API credentials saved successfully",
+      hasCredentials: true
+    });
+  } catch (error) {
+    console.error("Error saving Reddit credentials:", error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    res.status(500).json({ 
+      success: false, 
+      message: `Error saving Reddit credentials: ${errorMessage}` 
+    });
+  }
+});
+
+/**
+ * Route to check if Reddit API credentials exist
+ */
+router.get("/api/auth/reddit/credentials", (req: Request, res: Response) => {
+  try {
+    const hasCredentials = redditAuth.hasRedditCredentials();
+    
+    res.json({
+      success: true,
+      hasCredentials
+    });
+  } catch (error) {
+    console.error("Error checking Reddit credentials:", error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    res.status(500).json({
+      success: false,
+      message: `Error checking Reddit credentials: ${errorMessage}`
+    });
+  }
+});
+
 export default router;
