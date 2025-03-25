@@ -190,10 +190,12 @@ export class MemStorage implements IStorage {
     };
 
     // Initialize with some sample data
-    this.initializeSampleData();
+    this.initializeSampleData().catch(err => {
+      console.error("Failed to initialize sample data:", err);
+    });
   }
 
-  private initializeSampleData() {
+  private async initializeSampleData() {
     // Add sample affiliate programs
     const affiliatePrograms: InsertAffiliateProgram[] = [
       {
@@ -242,7 +244,9 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    affiliatePrograms.forEach(program => this.createAffiliateProgram(program));
+    for (const program of affiliatePrograms) {
+      await this.createAffiliateProgram(program);
+    }
 
     // Add sample subreddits
     const subreddits: InsertSubreddit[] = [
@@ -312,7 +316,9 @@ export class MemStorage implements IStorage {
       },
     ];
 
-    subreddits.forEach(subreddit => this.createSubreddit(subreddit));
+    for (const subreddit of subreddits) {
+      await this.createSubreddit(subreddit);
+    }
 
     // Add sample campaigns
     const campaigns: InsertCampaign[] = [
@@ -381,7 +387,9 @@ export class MemStorage implements IStorage {
       },
     ];
 
-    campaigns.forEach(campaign => this.createCampaign(campaign));
+    for (const campaign of campaigns) {
+      await this.createCampaign(campaign);
+    }
 
     // Add sample performance metrics
     const today = new Date();
@@ -415,7 +423,9 @@ export class MemStorage implements IStorage {
       },
     ];
 
-    metrics.forEach(metric => this.createMetric(metric));
+    for (const metric of metrics) {
+      await this.createMetric(metric);
+    }
 
     // Add sample activities
     const activities: InsertActivity[] = [
@@ -445,7 +455,9 @@ export class MemStorage implements IStorage {
       },
     ];
 
-    activities.forEach(activity => this.createActivity(activity));
+    for (const activity of activities) {
+      await this.createActivity(activity);
+    }
 
     // Add sample content templates
     const contentTemplates: InsertContentTemplate[] = [
@@ -472,7 +484,9 @@ export class MemStorage implements IStorage {
       },
     ];
 
-    contentTemplates.forEach(template => this.createContentTemplate(template));
+    for (const template of contentTemplates) {
+      await this.createContentTemplate(template);
+    }
 
     // Add sample Reddit posts
     const now = new Date();
@@ -534,15 +548,114 @@ export class MemStorage implements IStorage {
       },
     ];
 
-    redditPosts.forEach(post => this.createRedditPost(post));
+    for (const post of redditPosts) {
+      await this.createRedditPost(post);
+    }
 
     // Create a sample user
-    this.createUser({
+    await this.createUser({
       username: "admin",
       password: "password", // In a real app, this would be hashed
       email: "admin@example.com",
       apiUsageLimit: 10000,
     });
+    
+    // Add sample subreddit categories
+    const subredditCategories: InsertSubredditCategory[] = [
+      {
+        name: "Core AI & ML",
+        description: "Subreddits focused on artificial intelligence and machine learning",
+        parentCategory: null,
+      },
+      {
+        name: "Data Science",
+        description: "Data science, analytics, and visualization communities",
+        parentCategory: null,
+      },
+      {
+        name: "Programming",
+        description: "General programming and development communities",
+        parentCategory: null,
+      },
+      {
+        name: "SaaS & Cloud",
+        description: "Software-as-a-Service and cloud computing discussions",
+        parentCategory: null,
+      },
+      {
+        name: "Financial Technology",
+        description: "Finance, investing, and financial technology communities",
+        parentCategory: null,
+      },
+      {
+        name: "Productivity",
+        description: "Productivity tools, time management, and workflow optimization",
+        parentCategory: null,
+      },
+      {
+        name: "Digital Marketing",
+        description: "Marketing, SEO, advertising, and content creation",
+        parentCategory: null,
+      },
+      {
+        name: "Writing & Content",
+        description: "Writing, journalism, content creation, and publishing",
+        parentCategory: null,
+      },
+      {
+        name: "Tech Products",
+        description: "Tech product discussions, reviews, and recommendations",
+        parentCategory: null,
+      },
+      {
+        name: "Web Development",
+        description: "Web development specific communities",
+        parentCategory: "Programming",
+      },
+      {
+        name: "Mobile Development",
+        description: "Mobile app development communities",
+        parentCategory: "Programming",
+      },
+      {
+        name: "Business & Entrepreneurship",
+        description: "Business, startups, and entrepreneurship communities",
+        parentCategory: null,
+      }
+    ];
+    
+    // Save the categories
+    const categoryIds: Record<string, number> = {};
+    for (const category of subredditCategories) {
+      const savedCategory = await this.createSubredditCategory(category);
+      categoryIds[savedCategory.name] = savedCategory.id;
+    }
+    
+    // Create sample mappings between subreddits and categories
+    const categoryMappings = [
+      { subredditName: "r/writing", categoryName: "Writing & Content", relevanceScore: 0.95 },
+      { subredditName: "r/freelance", categoryName: "Business & Entrepreneurship", relevanceScore: 0.85 },
+      { subredditName: "r/freelance", categoryName: "Writing & Content", relevanceScore: 0.75 },
+      { subredditName: "r/investing", categoryName: "Financial Technology", relevanceScore: 0.9 },
+      { subredditName: "r/personalfinance", categoryName: "Financial Technology", relevanceScore: 0.85 },
+      { subredditName: "r/learnprogramming", categoryName: "Programming", relevanceScore: 0.95 },
+      { subredditName: "r/webdev", categoryName: "Web Development", relevanceScore: 0.98 },
+      { subredditName: "r/webdev", categoryName: "Programming", relevanceScore: 0.85 },
+      { subredditName: "r/sysadmin", categoryName: "SaaS & Cloud", relevanceScore: 0.8 },
+      { subredditName: "r/devops", categoryName: "SaaS & Cloud", relevanceScore: 0.9 },
+    ];
+    
+    // Create the mappings
+    for (const mapping of categoryMappings) {
+      const subreddit = await this.getSubredditByName(mapping.subredditName);
+      if (subreddit && categoryIds[mapping.categoryName]) {
+        await this.createSubredditCategoryMap({
+          subredditId: subreddit.id,
+          categoryId: categoryIds[mapping.categoryName],
+          relevanceScore: mapping.relevanceScore,
+        });
+      }
+    }
 
     // Add sample keywords
     const keywords: InsertKeyword[] = [
@@ -572,7 +685,9 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    keywords.forEach(keyword => this.createKeyword(keyword));
+    for (const keyword of keywords) {
+      await this.createKeyword(keyword);
+    }
 
     // Add sample opportunities
     const opportunities: InsertRedditOpportunity[] = [
@@ -611,7 +726,9 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    opportunities.forEach(opportunity => this.createRedditOpportunity(opportunity));
+    for (const opportunity of opportunities) {
+      await this.createRedditOpportunity(opportunity);
+    }
 
     // Add sample content queue items
     const queueItems: InsertContentQueueItem[] = [
@@ -627,7 +744,9 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    queueItems.forEach(item => this.createContentQueueItem(item));
+    for (const item of queueItems) {
+      await this.createContentQueueItem(item);
+    }
   }
 
   // Affiliate Programs methods
@@ -919,6 +1038,139 @@ export class MemStorage implements IStorage {
 
   async deleteContentTemplate(id: number): Promise<boolean> {
     return this.contentTemplates.delete(id);
+  }
+
+  // Subreddit Categories methods
+  async getSubredditCategories(): Promise<SubredditCategory[]> {
+    return Array.from(this.subredditCategories.values());
+  }
+
+  async getSubredditCategory(id: number): Promise<SubredditCategory | undefined> {
+    return this.subredditCategories.get(id);
+  }
+
+  async getSubredditCategoryByName(name: string): Promise<SubredditCategory | undefined> {
+    return Array.from(this.subredditCategories.values()).find(
+      (category) => category.name === name
+    );
+  }
+
+  async createSubredditCategory(category: InsertSubredditCategory): Promise<SubredditCategory> {
+    const id = this.currentIds.subredditCategories++;
+    const timestamp = new Date();
+    const newCategory: SubredditCategory = { 
+      ...category, 
+      id, 
+      createdAt: timestamp,
+      subredditCount: 0
+    };
+    this.subredditCategories.set(id, newCategory);
+    return newCategory;
+  }
+
+  async updateSubredditCategory(id: number, category: Partial<InsertSubredditCategory>): Promise<SubredditCategory | undefined> {
+    const existingCategory = this.subredditCategories.get(id);
+    if (!existingCategory) {
+      return undefined;
+    }
+
+    const updatedCategory: SubredditCategory = { ...existingCategory, ...category };
+    this.subredditCategories.set(id, updatedCategory);
+    return updatedCategory;
+  }
+
+  async deleteSubredditCategory(id: number): Promise<boolean> {
+    return this.subredditCategories.delete(id);
+  }
+
+  // Subreddit Category Mappings methods
+  async getSubredditCategoryMaps(): Promise<SubredditCategoryMap[]> {
+    return Array.from(this.subredditCategoryMaps.values());
+  }
+
+  async getSubredditCategoryMapsBySubreddit(subredditId: number): Promise<SubredditCategoryMap[]> {
+    return Array.from(this.subredditCategoryMaps.values()).filter(
+      (mapping) => mapping.subredditId === subredditId
+    );
+  }
+
+  async getSubredditCategoryMapsByCategory(categoryId: number): Promise<SubredditCategoryMap[]> {
+    return Array.from(this.subredditCategoryMaps.values()).filter(
+      (mapping) => mapping.categoryId === categoryId
+    );
+  }
+
+  async getSubredditsByCategoryId(categoryId: number): Promise<Subreddit[]> {
+    const mappings = await this.getSubredditCategoryMapsByCategory(categoryId);
+    const subredditIds = mappings.map(mapping => mapping.subredditId);
+    
+    const subreddits: Subreddit[] = [];
+    for (const id of subredditIds) {
+      const subreddit = await this.getSubreddit(id);
+      if (subreddit) {
+        subreddits.push(subreddit);
+      }
+    }
+    
+    return subreddits;
+  }
+
+  async getCategoriesBySubredditId(subredditId: number): Promise<SubredditCategory[]> {
+    const mappings = await this.getSubredditCategoryMapsBySubreddit(subredditId);
+    const categoryIds = mappings.map(mapping => mapping.categoryId);
+    
+    const categories: SubredditCategory[] = [];
+    for (const id of categoryIds) {
+      const category = await this.getSubredditCategory(id);
+      if (category) {
+        categories.push(category);
+      }
+    }
+    
+    return categories;
+  }
+
+  async createSubredditCategoryMap(mapping: InsertSubredditCategoryMap): Promise<SubredditCategoryMap> {
+    const id = this.currentIds.subredditCategoryMaps++;
+    const timestamp = new Date();
+    const newMapping: SubredditCategoryMap = { ...mapping, id, createdAt: timestamp };
+    this.subredditCategoryMaps.set(id, newMapping);
+    
+    // Update the subreddit count for the category
+    const category = await this.getSubredditCategory(mapping.categoryId);
+    if (category) {
+      const updatedCategory = { ...category, subredditCount: category.subredditCount + 1 };
+      this.subredditCategories.set(category.id, updatedCategory);
+    }
+    
+    return newMapping;
+  }
+
+  async updateSubredditCategoryMap(id: number, mapping: Partial<InsertSubredditCategoryMap>): Promise<SubredditCategoryMap | undefined> {
+    const existingMapping = this.subredditCategoryMaps.get(id);
+    if (!existingMapping) {
+      return undefined;
+    }
+
+    const updatedMapping: SubredditCategoryMap = { ...existingMapping, ...mapping };
+    this.subredditCategoryMaps.set(id, updatedMapping);
+    return updatedMapping;
+  }
+
+  async deleteSubredditCategoryMap(id: number): Promise<boolean> {
+    const mapping = this.subredditCategoryMaps.get(id);
+    if (!mapping) {
+      return false;
+    }
+    
+    // Update the subreddit count for the category
+    const category = await this.getSubredditCategory(mapping.categoryId);
+    if (category && category.subredditCount > 0) {
+      const updatedCategory = { ...category, subredditCount: category.subredditCount - 1 };
+      this.subredditCategories.set(category.id, updatedCategory);
+    }
+    
+    return this.subredditCategoryMaps.delete(id);
   }
 
   // User methods
