@@ -1,0 +1,152 @@
+🧠 Goal:
+Build a local system that:
+
+Scrapes Reddit threads from curated subreddits (API-free crawler).
+
+Classifies intent + affiliate match (using keyword scoring).
+
+Scrapes Google SERPs for keywords like "site:reddit.com Jasper AI review".
+
+Cross-checks: Is the Reddit thread ranking in Google? If yes, high opportunity.
+
+Outputs opportunity reports for you to comment/post.
+
+🧱 System Breakdown: Phase 1 MVP (Local, Python-Based)
+📦 1. Reddit Crawler (No API)
+✅ Scrape new, hot, or top threads from handpicked subreddits
+
+Extract:
+
+Title, selftext, upvotes, timestamp, flair, link
+
+Store in: opportunities_raw.sqlite or .json
+
+Tech: requests, BeautifulSoup, sqlite3
+
+🎯 2. Intent + Affiliate Match Engine
+For each thread:
+
+Classify:
+
+DISCOVERY → "What's the best AI writer?"
+
+COMPARISON → "Jasper vs Writesonic?"
+
+SHOWCASE, QUESTION, etc.
+
+Match:
+
+Look for keywords like “Frase,” “Jasper,” “AI writer,” “SEO tool”
+
+Map to affiliate program metadata (link + promo code)
+
+Score:
+
+Intent + affiliate relevance = Opportunity score (0–100)
+
+Tech: Python dicts, regex/keyword rules, or even GPT if needed later
+
+🌐 3. Google SERP Checker (Headless Browser)
+For each high-score Reddit thread (or keyword), Google:
+
+"site:reddit.com Jasper AI review"
+
+"best AI writer site:reddit.com"
+
+Scrape top 10 results:
+
+Check if any of the scraped Reddit thread URLs are in the results
+
+If found → mark as SERP Opportunity
+
+Tech:
+
+Use playwright (faster than Selenium) or serpapi (if you want to avoid scraping)
+
+Store ranking match as is_on_google = True + rank position
+
+🧪 4. Opportunity Report Generator
+Export as .csv, .json, or SQLite dashboard with:
+
+json
+Copy
+Edit
+{
+  "thread_title": "Jasper vs Copy AI?",
+  "subreddit": "r/Blogging",
+  "intent": "COMPARISON",
+  "affiliate_match": ["Jasper AI", "Copy AI"],
+  "opportunity_score": 87,
+  "google_rank_match": true,
+  "rank_position": 4,
+  "action": "Post comment with Jasper link + promo"
+}
+🖥 5. Local Dashboard or CLI View
+Option 1: CLI viewer with filtering
+
+Option 2: Jupyter notebook table
+
+Option 3: (Later) Replit React frontend connected to this system via a lightweight API
+
+⚡ Bonus Logic: Comment Generator (Next Step)
+For DISCOVERY posts:
+
+“I’ve used Jasper and Writesonic. Jasper is better for long-form SEO — here’s a 20% code if you’re curious: [your link]”
+
+For COMPARISON:
+
+“I’ve compared both. If you care about SEO briefs, Frase is 🔥 — I’ve been using it since 2023 (affiliate)”
+
+Use variables: {tool_name}, {use_case}, {link}, {promo_code}
+
+🏗 Folder Structure
+bash
+Copy
+Edit
+reddit-affiliate-intel/
+│
+├── reddit_crawler.py            # Scrapes Reddit posts
+├── affiliate_matcher.py         # Detects affiliate match + intent
+├── google_serp_checker.py       # Checks if Reddit thread ranks on Google
+├── models.py                    # DB schema + ORM (sqlite or tinydb)
+├── report_generator.py          # Outputs final CSV or JSON
+├── data/
+│   ├── threads_raw.json
+│   ├── opportunities.json
+│   └── serp_results.json
+├── affiliate_programs.json      # Your affiliate links + promo codes
+├── keywords.yaml                # Target keywords per niche
+├── requirements.txt
+└── README.md
+🚀 MVP Workflow
+bash
+Copy
+Edit
+# 1. Scrape Reddit Threads
+$ python reddit_crawler.py
+
+# 2. Analyze threads for intent + affiliate matches
+$ python affiliate_matcher.py
+
+# 3. Cross-check which rank on Google
+$ python google_serp_checker.py
+
+# 4. Export opportunity report
+$ python report_generator.py
+🛡️ Compliance & Ethics
+No Reddit login
+
+No automated posting
+
+No mass crawling (spread requests over time, cache results)
+
+This is all read-only intelligence with manual posting. Totally fair.
+
+✅ TL;DR: MVP Plan
+Component	Status	Tooling
+Reddit Crawler	✅ Easy	Python + BeautifulSoup
+Intent Classifier	✅ Easy-Mid	Regex or GPT (later)
+Affiliate Matcher	✅ Easy	Keyword-based
+Google Rank Checker	✅ Mid	Playwright or SerpAPI
+Report Generator	✅ Easy	JSON/CSV
+Dashboard	🟡 Optional	Jupyter or React (Phase 2)

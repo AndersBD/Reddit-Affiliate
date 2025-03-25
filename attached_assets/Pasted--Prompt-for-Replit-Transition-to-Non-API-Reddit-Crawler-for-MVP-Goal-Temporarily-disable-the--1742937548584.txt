@@ -1,0 +1,175 @@
+✅ Prompt for Replit: Transition to Non-API Reddit Crawler for MVP
+🧠 Goal: Temporarily disable the Reddit API-based integration and replace it with a lightweight, API-free Reddit crawler for MVP use. The crawler should discover content opportunities by scraping Reddit HTML and match them to affiliate keywords.
+We want to preserve all Reddit API-related code for future use (comment it out or move it to a dedicated folder), but switch to a simpler MVP solution that doesn't require API credentials or authentication.
+________________________________________
+🔧 Here's what needs to be done:
+1. Fork or Move Existing Reddit API Code
+•	Move all API-related logic into a separate folder (suggested: server/services/api-reddit/)
+o	Files to move:
+	server/services/redditAuth.ts
+	server/services/reddit-fetcher.ts
+	API routes from server/routes/index.ts like /auth/reddit, /reddit/..., etc.
+•	Update routes.ts to comment out or conditionally disable Reddit API routes.
+•	Maintain comments indicating: “Preserved for full API integration in future phase.”
+2. Implement Python-Based HTML Reddit Crawler
+•	Add a new crawler/ folder in the project root.
+•	Add a Python script: reddit_crawler.py that:
+o	Scrapes hot, new, top threads from each target subreddit (from DB or config file).
+o	Extracts: title, body, subreddit, upvotes, comment count, flair, timestamp, link.
+o	Filters threads using keywords from affiliate program tags.
+o	Saves results to JSON or SQLite file (data/opportunities.json or .sqlite).
+3. Replace Backend Thread Source (Temporarily)
+•	Instead of calling Reddit API for opportunities, have the backend read from data/opportunities.json (populated by the crawler).
+•	Create a function like loadLocalOpportunities() and expose it via:
+o	GET /api/opportunities — returns locally scraped + matched Reddit posts
+•	This lets the frontend work unchanged — just gets data from a different source.
+4. Wire Crawler into Replit App Lifecycle (Optional)
+•	Add a CRON-like scheduled call or manual trigger to run the crawler every few hours (e.g., using subprocess in Node or Shell script).
+•	Optional: add an admin-only UI button in Content Library to manually run the scraper.
+5. (Optional) Add Google SERP Checker
+•	For each matched Reddit thread:
+o	Google search: "site:reddit.com {thread_title}"
+o	If URL is found in top 10 results, mark serp_match: true
+o	Store that in the local opportunity data.
+•	Use playwright-python for SERP scraping (headless, undetectable, works well).
+________________________________________
+🧪 Output Schema (JSON or SQLite Record)
+json
+CopyEdit
+{
+  "title": "Best AI writer for blogging?",
+  "subreddit": "r/Blogging",
+  "intent": "DISCOVERY",
+  "affiliate_matches": ["Frase", "Jasper AI"],
+  "score": 87,
+  "serp_match": true,
+  "rank_position": 4,
+  "action": "Comment with Jasper link + promo code",
+  "link": "https://reddit.com/r/Blogging/comments/abc123"
+}
+________________________________________
+✅ Let me know when the non-API crawler system is wired in and I’ll help upgrade the scoring logic, integrate it into your frontend, or add automation/scheduling.
+________________________________________
+🧠 Strategy Summary
+Step	What You’re Doing
+✅ Preserve	Move Reddit API integration into /api-reddit/ for future use
+🧼 Disable	Comment out Reddit API routes + remove API dependency temporarily
+⚡ Replace	Use Python-based crawler to fetch & score Reddit posts
+🔁 Reuse	Plug crawler output into existing UI/API
+🛠 Build on	Add SERP checker + opportunity scoring next
+🧠 Goal:
+Build a local system that:
+1.	Scrapes Reddit threads from curated subreddits (API-free crawler).
+2.	Classifies intent + affiliate match (using keyword scoring).
+3.	Scrapes Google SERPs for keywords like "site:reddit.com Jasper AI review".
+4.	Cross-checks: Is the Reddit thread ranking in Google? If yes, high opportunity.
+5.	Outputs opportunity reports for you to comment/post.
+________________________________________
+🧱 System Breakdown: Phase 1 MVP (Local, Python-Based)
+📦 1. Reddit Crawler (No API)
+•	✅ Scrape new, hot, or top threads from handpicked subreddits
+•	Extract:
+o	Title, selftext, upvotes, timestamp, flair, link
+•	Store in: opportunities_raw.sqlite or .json
+Tech: requests, BeautifulSoup, sqlite3
+________________________________________
+🎯 2. Intent + Affiliate Match Engine
+•	For each thread:
+o	Classify:
+	DISCOVERY → "What's the best AI writer?"
+	COMPARISON → "Jasper vs Writesonic?"
+	SHOWCASE, QUESTION, etc.
+o	Match:
+	Look for keywords like “Frase,” “Jasper,” “AI writer,” “SEO tool”
+	Map to affiliate program metadata (link + promo code)
+•	Score:
+o	Intent + affiliate relevance = Opportunity score (0–100)
+Tech: Python dicts, regex/keyword rules, or even GPT if needed later
+________________________________________
+🌐 3. Google SERP Checker (Headless Browser)
+•	For each high-score Reddit thread (or keyword), Google:
+o	"site:reddit.com Jasper AI review"
+o	"best AI writer site:reddit.com"
+•	Scrape top 10 results:
+o	Check if any of the scraped Reddit thread URLs are in the results
+•	If found → mark as SERP Opportunity
+Tech:
+•	Use playwright (faster than Selenium) or serpapi (if you want to avoid scraping)
+•	Store ranking match as is_on_google = True + rank position
+________________________________________
+🧪 4. Opportunity Report Generator
+•	Export as .csv, .json, or SQLite dashboard with:
+json
+CopyEdit
+{
+  "thread_title": "Jasper vs Copy AI?",
+  "subreddit": "r/Blogging",
+  "intent": "COMPARISON",
+  "affiliate_match": ["Jasper AI", "Copy AI"],
+  "opportunity_score": 87,
+  "google_rank_match": true,
+  "rank_position": 4,
+  "action": "Post comment with Jasper link + promo"
+}
+________________________________________
+🖥 5. Local Dashboard or CLI View
+•	Option 1: CLI viewer with filtering
+•	Option 2: Jupyter notebook table
+•	Option 3: (Later) Replit React frontend connected to this system via a lightweight API
+________________________________________
+⚡ Bonus Logic: Comment Generator (Next Step)
+•	For DISCOVERY posts:
+“I’ve used Jasper and Writesonic. Jasper is better for long-form SEO — here’s a 20% code if you’re curious: [your link]”
+•	For COMPARISON:
+“I’ve compared both. If you care about SEO briefs, Frase is 🔥 — I’ve been using it since 2023 (affiliate)”
+Use variables: {tool_name}, {use_case}, {link}, {promo_code}
+________________________________________
+🏗 Folder Structure
+bash
+CopyEdit
+reddit-affiliate-intel/
+│
+├── reddit_crawler.py            # Scrapes Reddit posts
+├── affiliate_matcher.py         # Detects affiliate match + intent
+├── google_serp_checker.py       # Checks if Reddit thread ranks on Google
+├── models.py                    # DB schema + ORM (sqlite or tinydb)
+├── report_generator.py          # Outputs final CSV or JSON
+├── data/
+│   ├── threads_raw.json
+│   ├── opportunities.json
+│   └── serp_results.json
+├── affiliate_programs.json      # Your affiliate links + promo codes
+├── keywords.yaml                # Target keywords per niche
+├── requirements.txt
+└── README.md
+________________________________________
+🚀 MVP Workflow
+bash
+CopyEdit
+# 1. Scrape Reddit Threads
+$ python reddit_crawler.py
+
+# 2. Analyze threads for intent + affiliate matches
+$ python affiliate_matcher.py
+
+# 3. Cross-check which rank on Google
+$ python google_serp_checker.py
+
+# 4. Export opportunity report
+$ python report_generator.py
+________________________________________
+🛡️ Compliance & Ethics
+•	No Reddit login
+•	No automated posting
+•	No mass crawling (spread requests over time, cache results)
+This is all read-only intelligence with manual posting. Totally fair.
+________________________________________
+✅ TL;DR: MVP Plan
+Component	Status	Tooling
+Reddit Crawler	✅ Easy	Python + BeautifulSoup
+Intent Classifier	✅ Easy-Mid	Regex or GPT (later)
+Affiliate Matcher	✅ Easy	Keyword-based
+Google Rank Checker	✅ Mid	Playwright or SerpAPI
+Report Generator	✅ Easy	JSON/CSV
+Dashboard	🟡 Optional	Jupyter or React (Phase 2)
+
