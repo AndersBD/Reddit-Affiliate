@@ -16,11 +16,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Constants
-const DATA_DIR = path.join(__dirname, '..', '..', 'crawler', 'data');
+// Using absolute paths to ensure correct directory structure
+const PROJECT_ROOT = path.resolve(process.cwd());
+const DATA_DIR = path.join(PROJECT_ROOT, 'crawler', 'data');
 const OPPORTUNITIES_PATH = path.join(DATA_DIR, 'opportunities.json');
 const STATUS_PATH = path.join(DATA_DIR, 'status.json');
 const PYTHON_PATH = process.env.PYTHON_PATH || 'python';
-const CRAWLER_SCRIPT = path.join(__dirname, '..', '..', 'crawler', 'run_crawler.py');
+const CRAWLER_SCRIPT = path.join(PROJECT_ROOT, 'crawler', 'run_crawler.py');
 
 interface CrawlerStatus {
   status: 'idle' | 'running' | 'completed' | 'error';
@@ -61,12 +63,28 @@ interface CrawlerOpportunity {
 
 /**
  * Check if the crawler data directory exists and create it if needed
+ * Also create initial status file if it doesn't exist
  */
 function ensureDataDir(): boolean {
   try {
+    console.log(`Creating data directory at: ${DATA_DIR}`);
+    
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
+      console.log(`Created directory: ${DATA_DIR}`);
     }
+    
+    // Create a default status file if it doesn't exist
+    if (!fs.existsSync(STATUS_PATH)) {
+      const defaultStatus = {
+        status: 'idle',
+        last_updated: new Date().toISOString(),
+        details: {}
+      };
+      fs.writeFileSync(STATUS_PATH, JSON.stringify(defaultStatus, null, 2));
+      console.log(`Created default status file: ${STATUS_PATH}`);
+    }
+    
     return true;
   } catch (error) {
     console.error('Error ensuring data directory exists:', error);
@@ -251,9 +269,13 @@ export async function initializeCrawlerIntegration(): Promise<void> {
   console.log('Initializing crawler integration...');
   ensureDataDir();
   
-  // Check if opportunities file exists, if not run the crawler once
+  // Instead of automatically running the crawler on startup, 
+  // just log that it's ready to be run via the API
+  console.log('Crawler integration initialized - use /api/crawler/run endpoint to start crawling');
+  
+  // Create an empty opportunities file if it doesn't exist
   if (!fs.existsSync(OPPORTUNITIES_PATH)) {
-    console.log('No opportunities file found, running initial crawler...');
-    await runCrawler(true);
+    console.log('Creating empty opportunities file');
+    fs.writeFileSync(OPPORTUNITIES_PATH, JSON.stringify([]));
   }
 }

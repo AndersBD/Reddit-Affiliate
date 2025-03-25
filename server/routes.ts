@@ -1367,6 +1367,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('Reddit authentication routes disabled - missing API credentials');
   }
   
+  // Reddit Crawler API Routes
+  apiRouter.get("/crawler/status", async (req, res) => {
+    try {
+      const status = await getCrawlerStatus();
+      res.json(status);
+    } catch (error) {
+      console.error("Error getting crawler status:", error);
+      res.status(500).json({ message: "Error getting crawler status" });
+    }
+  });
+
+  apiRouter.get("/crawler/opportunities", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
+      const opportunities = await getCrawlerOpportunities(limit);
+      res.json(opportunities);
+    } catch (error) {
+      console.error("Error getting crawler opportunities:", error);
+      res.status(500).json({ message: "Error getting crawler opportunities" });
+    }
+  });
+
+  apiRouter.post("/crawler/run", async (req, res) => {
+    try {
+      const { force, subreddits } = req.body;
+      const success = await runCrawler(!!force, subreddits);
+      res.json({ success });
+    } catch (error) {
+      console.error("Error running crawler:", error);
+      res.status(500).json({ message: "Error running crawler" });
+    }
+  });
+
+  apiRouter.patch("/crawler/opportunity/:threadId", async (req, res) => {
+    try {
+      const { threadId } = req.params;
+      const { status } = req.body;
+      
+      if (!['new', 'queued', 'processed', 'ignored'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status value" });
+      }
+      
+      const success = await updateOpportunityStatus(threadId, status);
+      if (!success) {
+        return res.status(404).json({ message: "Opportunity not found" });
+      }
+      
+      res.json({ success });
+    } catch (error) {
+      console.error("Error updating opportunity status:", error);
+      res.status(500).json({ message: "Error updating opportunity status" });
+    }
+  });
+
+  apiRouter.post("/crawler/import", async (req, res) => {
+    try {
+      const { opportunity } = req.body;
+      
+      if (!opportunity) {
+        return res.status(400).json({ message: "Opportunity data is required" });
+      }
+      
+      const dbOpportunity = convertToDbOpportunity(opportunity);
+      
+      // Check if the opportunity already exists
+      const existingOpportunity = await storage.getRedditOpportunityByUrl(dbOpportunity.url || dbOpportunity.redditPostUrl);
+      if (existingOpportunity) {
+        return res.json(existingOpportunity);
+      }
+      
+      // Create new opportunity in the database
+      const savedOpportunity = await storage.createRedditOpportunity(dbOpportunity);
+      
+      // Update the status in the crawler data
+      await updateOpportunityStatus(opportunity.thread_id, 'processed');
+      
+      res.json(savedOpportunity);
+    } catch (error) {
+      console.error("Error importing opportunity:", error);
+      res.status(500).json({ message: "Error importing opportunity" });
+    }
+  });
+
   // Mount other API routes
   app.use("/api", apiRouter);
 

@@ -20,9 +20,10 @@ from datetime import datetime, timedelta
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 
-from crawler.reddit_scraper import fetch_multiple_subreddits, save_raw_threads
-from crawler.keyword_matcher import process_threads_to_opportunities
-from crawler.data_storage import sync_opportunities_from_file, get_top_opportunities
+# Using direct imports since we're already in the crawler directory
+from reddit_scraper import fetch_multiple_subreddits, save_raw_threads
+from keyword_matcher import process_threads_to_opportunities
+from data_storage import sync_opportunities_from_file, get_top_opportunities
 
 # Constants
 DATA_DIR = os.path.join(project_root, 'crawler', 'data')

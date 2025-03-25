@@ -5,6 +5,7 @@ import { initializeDatabase } from "./db";
 import session from "express-session";
 import { randomBytes } from "crypto";
 import { PORT, SESSION_CONFIG } from "./config";
+import { initializeCrawlerIntegration } from "./services/crawler-integration";
 
 const app = express();
 app.use(express.json());
@@ -57,6 +58,14 @@ app.use((req, res, next) => {
     log('Database initialized successfully');
   } catch (error) {
     log(`Error initializing database: ${error}`, 'error');
+  }
+  
+  // Initialize the Reddit crawler integration
+  try {
+    await initializeCrawlerIntegration();
+    log('Reddit crawler integration initialized successfully');
+  } catch (error) {
+    log(`Error initializing Reddit crawler integration: ${error}`, 'error');
   }
 
   const server = await registerRoutes(app);
